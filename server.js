@@ -149,9 +149,15 @@ app.patch('/api/orders/:id', (req, res) => {
 });
 
 // Advance to next status (convenience for parrillero)
+// Optimistic concurrency: client may pass { from } to assert the
+// expected current status — prevents double-clicks from skipping.
 app.post('/api/orders/:id/advance', (req, res) => {
   const order = db.orders[req.params.id];
   if (!order) return res.status(404).json({ error: 'not found' });
+  const { from } = req.body || {};
+  if (from && from !== order.status) {
+    return res.status(409).json({ error: 'stale state', current: order.status });
+  }
   const next = nextStatus(order.status);
   if (!next) return res.status(400).json({ error: 'already at final status' });
   order.status = next;

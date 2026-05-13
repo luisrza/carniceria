@@ -609,12 +609,40 @@ function rerenderAll() {
   }
 }
 
+const inFlight = new Set();
+
+function lockOrderButtons(id, locked) {
+  document.querySelectorAll(`[data-action][data-id="${id}"]`).forEach(b => {
+    b.disabled = locked;
+    b.style.opacity = locked ? '0.5' : '';
+    b.style.cursor = locked ? 'wait' : '';
+    b.style.pointerEvents = locked ? 'none' : '';
+  });
+}
+
 async function handleAction(action, id) {
   const order = ordersById.get(id);
   if (!order) return;
+  // Prevent double-clicks from skipping statuses
+  if (inFlight.has(id)) return;
+  inFlight.add(id);
+  lockOrderButtons(id, true);
   try {
     if (action === 'advance') {
-      const r = await fetch(`/api/orders/${id}/advance`, { method: 'POST' });
+      const r = await fetch(`/api/orders/${id}/advance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: order.status }),
+      });
+      if (r.status === 409) {
+        // Stale state — server already moved on (likely from SSE or another tab).
+        // Pull the latest and re-render without advancing further.
+        const data = await r.json();
+        order.status = data.current;
+        ordersById.set(id, order);
+        rerenderAll();
+        return;
+      }
       if (!r.ok) throw new Error();
       const o = await r.json();
       ordersById.set(o.id, o);
@@ -643,6 +671,9 @@ async function handleAction(action, id) {
     }
   } catch (e) {
     toast(t('toast.error'));
+  } finally {
+    inFlight.delete(id);
+    lockOrderButtons(id, false);
   }
 }
 
