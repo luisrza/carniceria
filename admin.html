@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>Admin · LA CARNICERÍA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: {
+      display: ['"Bebas Neue"', 'sans-serif'],
+      sans: ['Inter', 'system-ui', 'sans-serif'],
+      mono: ['"JetBrains Mono"', 'monospace'],
+    }}},
+  };
+</script>
+<style>
+  :root { --ink:#0a0a0a; --paper:#fafaf7; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--paper); color: var(--ink); }
+  body { -webkit-font-smoothing: antialiased; }
+  ::selection { background: #0a0a0a; color: #fafaf7; }
+
+  .lang-btn.is-active { background: #0a0a0a; color: #fafaf7; }
+  .filter-chip.is-active { background: #0a0a0a; color: #fafaf7; }
+  .range-btn.is-active { background: #0a0a0a; color: #fafaf7; }
+  /* Hourly chart bars */
+  .hour-bar { flex: 1; background: #0a0a0a; transition: height .35s ease; min-height: 2px; position: relative; }
+  .hour-bar.is-peak { background: #fbbf24; }
+  .hour-bar:hover::after {
+    content: attr(data-tooltip);
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: #0a0a0a; color: #fafaf7;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 2px 6px; white-space: nowrap;
+    border: 1px solid #fafaf7;
+  }
+
+  /* Status pills — consistent fixed width so all align */
+  .pill-queued, .pill-seasoning, .pill-grilling, .pill-ready {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 9rem;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  @media (max-width: 639px) {
+    .pill-queued, .pill-seasoning, .pill-grilling, .pill-ready {
+      min-width: 7.5rem;
+    }
+  }
+  .pill-queued    { background:#fafaf7; border:2px solid #0a0a0a; color:#0a0a0a; }
+  .pill-seasoning { background:#fbbf24; border:2px solid #0a0a0a; color:#0a0a0a; }
+  .pill-grilling  { background:#dc2626; border:2px solid #0a0a0a; color:#fafaf7; }
+  .pill-ready     { background:#10b981; border:2px solid #0a0a0a; color:#fafaf7; }
+  .status-ico { flex-shrink: 0; }
+
+  .live-dot { position: relative; }
+  .live-dot::after {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 9999px; background: currentColor; opacity: .35;
+    animation: pulse 1.6s ease-out infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(.8); opacity: .5; } 100% { transform: scale(2.2); opacity: 0; } }
+
+  .row-flash { animation: rowflash 1.4s ease-out; }
+  @keyframes rowflash {
+    0%, 100% { background: #fafaf7; }
+    25% { background: #fde68a; }
+  }
+
+  details summary { cursor: pointer; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform .15s ease; display: inline-block; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="font-sans">
+
+<header class="sticky top-0 z-30 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur">
+  <div class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-2">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+          <path d="M6 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7H6V10Z" fill="#0a0a0a"/>
+          <path d="M16 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7h-3V10Z" fill="#0a0a0a"/>
+        </svg>
+      </a>
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="role"></div>
+        <div class="font-display text-xl tracking-wider leading-tight">ADMIN</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/parrillero" class="hidden border-2 border-black bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-widest sm:block hover:bg-black hover:text-white transition" data-i18n="link.parrillero"></a>
+      <div class="hidden items-center gap-2 md:flex">
+        <span class="relative inline-flex h-2 w-2 text-emerald-600 live-dot">
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-600"></span>
+        </span>
+        <span id="conn-status" class="font-mono text-[10px] uppercase tracking-widest text-neutral-700" data-i18n="live"></span>
+      </div>
+      <div class="flex border-2 border-black overflow-hidden">
+        <button data-lang="es" class="lang-btn min-h-[36px] px-2.5 text-[11px] font-bold uppercase tracking-widest">ES</button>
+        <button data-lang="en" class="lang-btn min-h-[36px] px-2.5 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black">EN</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- DATE RANGE SELECTOR -->
+<section class="border-b-2 border-black bg-[var(--paper)]">
+  <div class="mx-auto max-w-7xl px-3 py-3 sm:px-6">
+    <div class="flex items-center justify-between gap-2 flex-wrap">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-600" data-i18n="range.label"></div>
+      <div class="flex border-2 border-black overflow-hidden">
+        <button data-range="today" class="range-btn is-active min-h-[36px] px-3 text-[11px] font-bold uppercase tracking-widest" data-i18n="range.today"></button>
+        <button data-range="week"  class="range-btn min-h-[36px] px-3 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black" data-i18n="range.week"></button>
+        <button data-range="month" class="range-btn min-h-[36px] px-3 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black" data-i18n="range.month"></button>
+        <button data-range="all"   class="range-btn min-h-[36px] px-3 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black" data-i18n="range.all"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD STATS -->
+<section class="border-b-2 border-black bg-white">
+  <div class="mx-auto grid max-w-7xl grid-cols-2 divide-x-2 divide-y-2 divide-black sm:grid-cols-4 sm:divide-y-0">
+    <div class="p-3 sm:p-5">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="stat.revenue"></div>
+      <div id="stat-revenue" class="font-display text-3xl leading-none sm:text-5xl">—</div>
+      <div class="mt-1 font-mono text-[9px] uppercase tracking-widest text-neutral-400" data-i18n="stat.revenue.sub"></div>
+    </div>
+    <div class="p-3 sm:p-5">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="stat.total"></div>
+      <div id="stat-total" class="font-display text-3xl leading-none sm:text-5xl">—</div>
+      <div class="mt-1 font-mono text-[9px] uppercase tracking-widest text-neutral-400" data-i18n="stat.total.sub"></div>
+    </div>
+    <div class="p-3 sm:p-5">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="stat.avg"></div>
+      <div id="stat-avg" class="font-display text-3xl leading-none sm:text-5xl">—</div>
+      <div class="mt-1 font-mono text-[9px] uppercase tracking-widest text-neutral-400" data-i18n="stat.avg.sub"></div>
+    </div>
+    <div class="p-3 sm:p-5">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="stat.items"></div>
+      <div id="stat-items" class="font-display text-3xl leading-none sm:text-5xl">—</div>
+      <div class="mt-1 font-mono text-[9px] uppercase tracking-widest text-neutral-400" data-i18n="stat.items.sub"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP ITEMS + HOURLY CHART -->
+<section class="border-b-2 border-black bg-[var(--paper)]">
+  <div class="mx-auto grid max-w-7xl gap-0 sm:grid-cols-2">
+    <!-- Top items -->
+    <div class="border-b-2 sm:border-b-0 sm:border-r-2 border-black bg-white p-4 sm:p-6">
+      <div class="flex items-baseline justify-between mb-3">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="dash.topItems.label"></div>
+          <div class="font-display text-2xl sm:text-3xl" data-i18n="dash.topItems.title"></div>
+        </div>
+      </div>
+      <ul id="top-items" class="space-y-1.5"></ul>
+      <div id="top-items-empty" class="hidden text-center py-6 font-mono text-[10px] uppercase tracking-widest text-neutral-400" data-i18n="dash.empty"></div>
+    </div>
+    <!-- Hourly bars -->
+    <div class="bg-white p-4 sm:p-6">
+      <div class="flex items-baseline justify-between mb-3">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="dash.hourly.label"></div>
+          <div class="font-display text-2xl sm:text-3xl" data-i18n="dash.hourly.title"></div>
+        </div>
+        <div id="hourly-peak" class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">—</div>
+      </div>
+      <div id="hourly-chart" class="flex items-end gap-0.5 h-32 border-b-2 border-l-2 border-black"></div>
+      <div class="mt-1 flex justify-between font-mono text-[9px] uppercase tracking-widest text-neutral-500">
+        <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<section class="sticky top-14 z-20 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur">
+  <div class="mx-auto max-w-7xl px-3 py-2 sm:px-6">
+    <div class="no-scrollbar flex gap-2 overflow-x-auto">
+      <button data-filter="all" class="filter-chip is-active border-2 border-black px-4 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span data-i18n="filter.all"></span>
+        <span class="ml-1 font-mono opacity-70" data-count="all">0</span>
+      </button>
+      <button data-filter="queued" class="filter-chip border-2 border-black px-4 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span data-i18n="status.queued"></span>
+        <span class="ml-1 font-mono opacity-70" data-count="queued">0</span>
+      </button>
+      <button data-filter="seasoning" class="filter-chip border-2 border-black px-4 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span data-i18n="status.seasoning"></span>
+        <span class="ml-1 font-mono opacity-70" data-count="seasoning">0</span>
+      </button>
+      <button data-filter="grilling" class="filter-chip border-2 border-black px-4 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span data-i18n="status.grilling"></span>
+        <span class="ml-1 font-mono opacity-70" data-count="grilling">0</span>
+      </button>
+      <button data-filter="ready" class="filter-chip border-2 border-black px-4 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span data-i18n="status.ready"></span>
+        <span class="ml-1 font-mono opacity-70" data-count="ready">0</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ORDERS LIST -->
+<main class="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
+  <div id="orders" class="space-y-2"></div>
+
+  <!-- empty state -->
+  <div id="empty-state" class="hidden mt-12 text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center border-2 border-black bg-white">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2">
+        <path d="M3 7h18M3 12h18M3 17h18"/>
+      </svg>
+    </div>
+    <div class="mt-4 font-display text-3xl" data-i18n="empty.title"></div>
+    <p class="mt-1 text-sm text-neutral-700" data-i18n="empty.desc"></p>
+  </div>
+</main>
+
+<script>
+const I18N = {
+  es: {
+    'role':'Cocina',
+    'live':'En vivo',
+    'link.parrillero':'Ver kanban →',
+
+    'stat.total':'Pedidos',
+    'stat.total.sub':'En el periodo',
+    'stat.revenue':'Ingresos',
+    'stat.revenue.sub':'Total vendido',
+    'stat.avg':'Ticket prom.',
+    'stat.avg.sub':'Por orden',
+    'stat.items':'Items',
+    'stat.items.sub':'Unidades vendidas',
+    'stat.active':'Activos',
+
+    'range.label':'Rango',
+    'range.today':'Hoy',
+    'range.week':'Semana',
+    'range.month':'Mes',
+    'range.all':'Todo',
+
+    'dash.topItems.label':'Más vendidos',
+    'dash.topItems.title':'TOP ITEMS',
+    'dash.hourly.label':'Distribución',
+    'dash.hourly.title':'POR HORA',
+    'dash.empty':'Aún no hay ventas en este rango',
+    'dash.peak':'Pico',
+
+    'filter.all':'Todos',
+    'status.queued':'En la cola',
+    'status.seasoning':'Sasonando',
+    'status.grilling':'En la parrilla',
+    'status.ready':'Lista',
+
+    'card.placedAt':'Recibido',
+    'card.elapsed':'hace',
+    'card.justNow':'ahora',
+    'card.min':'min',
+    'card.h':'h',
+    'card.items':'items',
+    'card.item':'item',
+    'card.donenessLabel':'Términos',
+    'card.notesLabel':'Notas',
+
+    'empty.title':'Sin pedidos',
+    'empty.desc':'Cuando entren pedidos aparecerán aquí en vivo.',
+
+    'cart.label.parrilla':'parrilla', 'cart.label.salsa':'salsa',
+    'cart.label.bebida':'bebida',     'cart.label.extra':'extra',
+
+    'don.azul':'Azul', 'don.rojo':'Rojo', 'don.medio':'Medio rojo',
+    'don.tres':'Tres cuartos', 'don.cuatro':'Punto', 'don.bien':'Bien cocido',
+  },
+  en: {
+    'role':'Kitchen',
+    'live':'Live',
+    'link.parrillero':'See kanban →',
+
+    'stat.total':'Orders',
+    'stat.total.sub':'In period',
+    'stat.revenue':'Revenue',
+    'stat.revenue.sub':'Total sold',
+    'stat.avg':'Avg ticket',
+    'stat.avg.sub':'Per order',
+    'stat.items':'Items',
+    'stat.items.sub':'Units sold',
+    'stat.active':'Active',
+
+    'range.label':'Range',
+    'range.today':'Today',
+    'range.week':'Week',
+    'range.month':'Month',
+    'range.all':'All',
+
+    'dash.topItems.label':'Best sellers',
+    'dash.topItems.title':'TOP ITEMS',
+    'dash.hourly.label':'Distribution',
+    'dash.hourly.title':'BY HOUR',
+    'dash.empty':'No sales in this range yet',
+    'dash.peak':'Peak',
+
+    'filter.all':'All',
+    'status.queued':'In queue',
+    'status.seasoning':'Seasoning',
+    'status.grilling':'On grill',
+    'status.ready':'Ready',
+
+    'card.placedAt':'Placed',
+    'card.elapsed':'',
+    'card.justNow':'now',
+    'card.min':'min',
+    'card.h':'h',
+    'card.items':'items',
+    'card.item':'item',
+    'card.donenessLabel':'Doneness',
+    'card.notesLabel':'Notes',
+
+    'empty.title':'No orders',
+    'empty.desc':'New orders will appear here live.',
+
+    'cart.label.parrilla':'grill', 'cart.label.salsa':'sauce',
+    'cart.label.bebida':'drink',   'cart.label.extra':'extra',
+
+    'don.azul':'Blue', 'don.rojo':'Rare', 'don.medio':'Medium rare',
+    'don.tres':'Medium', 'don.cuatro':'Medium well', 'don.bien':'Well done',
+  },
+};
+
+const STATUSES = ['queued', 'seasoning', 'grilling', 'ready'];
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+let lang = localStorage.getItem('lang') || 'es';
+const t = (k) => I18N[lang][k] ?? k;
+
+const ordersById = new Map();
+let activeFilter = 'all';
+
+function applyI18n() {
+  document.documentElement.lang = lang;
+  $$('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  $$('.lang-btn').forEach(b => b.classList.toggle('is-active', b.dataset.lang === lang));
+}
+$$('.lang-btn').forEach(b => b.addEventListener('click', () => {
+  lang = b.dataset.lang;
+  localStorage.setItem('lang', lang);
+  applyI18n();
+  rerender();
+}));
+
+function timeStr(ts) {
+  return new Date(ts).toLocaleTimeString(lang === 'es' ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+}
+function timeAgo(ts) {
+  const diff = Math.max(0, Date.now() - ts);
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return t('card.justNow');
+  if (m < 60) return `${m} ${t('card.min')}`;
+  const h = Math.floor(m / 60);
+  return `${h}${t('card.h')} ${m % 60}${t('card.min')}`;
+}
+function donenessColor(id) {
+  const m = { azul:'#5b1212', rojo:'#7a1a1a', medio:'#a23030', tres:'#b9614a', cuatro:'#9c6242', bien:'#5e3a23' };
+  return m[id] || '#000';
+}
+
+function statusIcon(status) {
+  const ico = {
+    // En la cola — hourglass
+    queued: `<svg class="status-ico" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 2h8M4 14h8M4.5 2.5v3l3.5 2.5 3.5-2.5v-3M4.5 13.5v-3l3.5-2.5 3.5 2.5v3"/></svg>`,
+    // Sasonando — salt shaker
+    seasoning: `<svg class="status-ico" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="5" y="5" width="6" height="9"/><path d="M5 5V3h6v2"/><circle cx="7" cy="3.6" r="0.5" fill="currentColor" stroke="none"/><circle cx="9" cy="3.6" r="0.5" fill="currentColor" stroke="none"/><circle cx="8" cy="2" r="0.5" fill="currentColor" stroke="none"/></svg>`,
+    // En la parrilla — flame
+    grilling: `<svg class="status-ico" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M8 1.5c1.6 2.5 3 3.5 3 6.5a3 3 0 01-6 0c0-1.5.8-2.3 1.5-3 0 1.3 1.5 1.3 1.5-3.5z"/></svg>`,
+    // Lista — check
+    ready: `<svg class="status-ico" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"><path d="M3 8l3.5 3.5L13 5"/></svg>`,
+  };
+  return ico[status] || '';
+}
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+let currentRange = 'today';
+
+async function refreshStats() {
+  // Filter chip counts (active orders only)
+  const all = [...ordersById.values()];
+  STATUSES.forEach(s => {
+    const c = document.querySelector(`[data-count="${s}"]`);
+    if (c) c.textContent = all.filter(o => o.status === s).length;
+  });
+  const cAll = document.querySelector('[data-count="all"]');
+  if (cAll) cAll.textContent = all.length;
+
+  // Dashboard stats from server
+  try {
+    const r = await fetch(`/api/stats?range=${currentRange}`);
+    if (!r.ok) return;
+    const s = await r.json();
+    $('#stat-revenue').textContent = fmt(s.revenue);
+    $('#stat-total').textContent   = s.orderCount;
+    $('#stat-avg').textContent     = fmt(s.avgTicket);
+    $('#stat-items').textContent   = s.totalItems;
+    renderTopItems(s.topItems);
+    renderHourly(s.hourly, s.hourlyRevenue);
+  } catch {}
+}
+
+function renderTopItems(items) {
+  const list = $('#top-items');
+  const empty = $('#top-items-empty');
+  if (!items || items.length === 0) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  const maxQty = Math.max(...items.map(i => i.qty), 1);
+  list.innerHTML = items.map((it, idx) => {
+    const widthPct = Math.max(8, Math.round((it.qty / maxQty) * 100));
+    return `
+      <li class="relative">
+        <div class="relative border-2 border-black overflow-hidden">
+          <div class="absolute inset-y-0 left-0 bg-amber-300" style="width:${widthPct}%"></div>
+          <div class="relative flex items-center justify-between gap-2 px-3 py-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-mono text-[10px] font-bold w-6">#${idx+1}</span>
+              <span class="font-bold text-sm truncate">${it.name}</span>
+            </div>
+            <div class="flex items-baseline gap-2 shrink-0">
+              <span class="font-display text-xl leading-none">${it.qty}</span>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-600">${fmt(it.revenue)}</span>
+            </div>
+          </div>
+        </div>
+      </li>
+    `;
+  }).join('');
+}
+
+function renderHourly(hourly, hourlyRevenue) {
+  const chart = $('#hourly-chart');
+  if (!chart) return;
+  const max = Math.max(...hourly, 1);
+  const peakIdx = hourly.indexOf(max);
+  chart.innerHTML = hourly.map((count, h) => {
+    const pct = Math.round((count / max) * 100);
+    const isPeak = count > 0 && h === peakIdx;
+    const tip = count
+      ? `${String(h).padStart(2,'0')}h · ${count} · ${fmt(hourlyRevenue[h])}`
+      : `${String(h).padStart(2,'0')}h`;
+    return `<div class="hour-bar ${isPeak ? 'is-peak' : ''}" style="height:${pct}%" data-tooltip="${tip}"></div>`;
+  }).join('');
+  const peak = $('#hourly-peak');
+  if (peak) {
+    peak.textContent = max > 0
+      ? `${t('dash.peak')}: ${String(peakIdx).padStart(2,'0')}h (${max})`
+      : '—';
+  }
+}
+
+function buildRow(o) {
+  const items = o.items || [];
+  const totalQty = items.reduce((s, i) => s + i.qty, 0);
+  const pkgs = items.filter(i => i.type === 'package');
+  const donenessIds = [...new Set(pkgs.filter(p => p.doneness).map(p => p.doneness))];
+  const donenessChips = donenessIds.map(d => `
+    <span class="inline-flex items-center gap-1 border border-black bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase">
+      <span class="inline-block h-2 w-2 rounded-full" style="background:${donenessColor(d)}"></span>${t('don.' + d)}
+    </span>
+  `).join('');
+
+  const notesAll = [...new Set(pkgs.flatMap(p => p.notes || []))];
+  const notesEs = { 'notes.0':'Sin sal','notes.1':'Extra término','notes.2':'Cortar en tiras','notes.3':'Sin grasa','notes.4':'Bien sellado','notes.5':'Servir aparte' };
+  const notesEn = { 'notes.0':'No salt','notes.1':'Extra cooked','notes.2':'Sliced','notes.3':'No fat','notes.4':'Well seared','notes.5':'On the side' };
+  const notesMap = lang === 'es' ? notesEs : notesEn;
+  const notesChips = notesAll.map(k => `<span class="border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase">${notesMap[k] || k}</span>`).join(' ');
+
+  // expanded items list
+  const itemsHtml = items.map(it => {
+    if (it.type === 'package') {
+      return `
+        <li class="flex items-baseline justify-between gap-2 py-1 border-b border-dashed border-neutral-300 last:border-0">
+          <span class="font-display text-base leading-tight">${it.name.toUpperCase()}${it.serves ? ` · ${it.serves}` : ''}</span>
+          <span class="font-mono text-xs">×${it.qty} · ${fmt(it.price)}</span>
+        </li>
+      `;
+    }
+    return `
+      <li class="flex items-baseline justify-between gap-2 py-1 text-sm border-b border-dashed border-neutral-300 last:border-0">
+        <span class="font-mono text-[11px] text-neutral-700">${it.name}${it.sub ? ' · ' + it.sub : ''}</span>
+        <span class="font-mono text-xs">×${it.qty} · ${fmt(it.price)}</span>
+      </li>
+    `;
+  }).join('');
+
+  return `
+    <details data-order-id="${o.id}" class="group border-2 border-black bg-white">
+      <summary class="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-3 sm:grid-cols-[auto_1fr_auto_auto_auto] sm:gap-4 sm:px-4">
+        <div class="hidden sm:block">
+          ${o.customerName ? `<div class="font-display text-xl leading-none uppercase">${o.customerName}</div>` : ''}
+          <div class="font-mono text-[11px] uppercase tracking-widest ${o.customerName ? 'text-neutral-700' : 'font-display !text-2xl text-black'}">${o.id}</div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">${timeStr(o.created_at)} · ${timeAgo(o.created_at)}</div>
+        </div>
+        <div class="sm:hidden">
+          <div class="flex items-baseline justify-between gap-2">
+            <div>
+              ${o.customerName ? `<div class="font-display text-xl leading-none uppercase">${o.customerName}</div>` : ''}
+              <div class="font-mono text-[10px] uppercase tracking-widest ${o.customerName ? 'text-neutral-600' : 'font-display !text-xl text-black'}">${o.id}</div>
+            </div>
+            <span class="pill-${o.status} px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">${statusIcon(o.status)}<span>${t('status.' + o.status)}</span></span>
+          </div>
+          <div class="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-neutral-500">${timeStr(o.created_at)} · ${timeAgo(o.created_at)}</div>
+        </div>
+        <div class="hidden sm:block">
+          <div class="text-sm">${totalQty} ${totalQty === 1 ? t('card.item') : t('card.items')}</div>
+          <div class="font-mono text-[11px] text-neutral-600">${pkgs.length > 0 ? `${pkgs.length} pkg` : ''}</div>
+        </div>
+        <div class="hidden font-display text-xl sm:block">${fmt(o.total)}</div>
+        <span class="hidden pill-${o.status} px-3 py-1 text-[10px] font-bold uppercase tracking-widest sm:inline-flex">${statusIcon(o.status)}<span>${t('status.' + o.status)}</span></span>
+        <div class="font-display text-lg sm:hidden">${fmt(o.total)}</div>
+        <span class="chev font-mono text-base">▶</span>
+      </summary>
+      <div class="border-t-2 border-black px-3 py-3 sm:px-4 sm:py-4">
+        ${donenessChips ? `
+          <div class="mb-2">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 mb-1">${t('card.donenessLabel')}</div>
+            <div class="flex flex-wrap gap-1">${donenessChips}</div>
+          </div>
+        ` : ''}
+        ${notesChips ? `
+          <div class="mb-2">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 mb-1">${t('card.notesLabel')}</div>
+            <div class="flex flex-wrap gap-1">${notesChips}</div>
+          </div>
+        ` : ''}
+        <ul class="mt-2">${itemsHtml}</ul>
+      </div>
+    </details>
+  `;
+}
+
+function rerender() {
+  applyI18n();
+  refreshStats();
+  const all = [...ordersById.values()].sort((a, b) => b.created_at - a.created_at);
+  const filtered = activeFilter === 'all' ? all : all.filter(o => o.status === activeFilter);
+  $('#orders').innerHTML = filtered.map(buildRow).join('');
+  $('#empty-state').classList.toggle('hidden', filtered.length > 0);
+}
+
+function flashRow(id) {
+  const el = document.querySelector(`[data-order-id="${id}"]`);
+  if (el) {
+    el.classList.add('row-flash');
+    setTimeout(() => el.classList.remove('row-flash'), 1500);
+  }
+}
+
+// FILTER chips
+$$('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    $$('.filter-chip').forEach(b => b.classList.toggle('is-active', b === btn));
+    rerender();
+  });
+});
+
+// RANGE selector (dashboard date filter)
+$$('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentRange = btn.dataset.range;
+    $$('.range-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+    refreshStats();
+  });
+});
+
+// SSE
+function subscribe() {
+  const es = new EventSource('/api/stream');
+  es.addEventListener('order:new', (e) => {
+    const o = JSON.parse(e.data);
+    ordersById.set(o.id, o);
+    rerender();
+    flashRow(o.id);
+  });
+  es.addEventListener('order:update', (e) => {
+    const o = JSON.parse(e.data);
+    ordersById.set(o.id, o);
+    rerender();
+    flashRow(o.id);
+  });
+  es.addEventListener('order:delete', (e) => {
+    const { id } = JSON.parse(e.data);
+    ordersById.delete(id);
+    rerender();
+  });
+  es.onerror = () => {
+    $('#conn-status').textContent = lang === 'es' ? 'Reconectando…' : 'Reconnecting…';
+    setTimeout(() => { $('#conn-status').textContent = t('live'); }, 3000);
+  };
+}
+
+async function loadOrders() {
+  try {
+    const r = await fetch('/api/orders?includeReady=1');
+    const list = await r.json();
+    list.forEach(o => ordersById.set(o.id, o));
+    rerender();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+applyI18n();
+loadOrders();
+subscribe();
+setInterval(rerender, 30000); // refresh time labels
+</script>
+</body>
+</html>

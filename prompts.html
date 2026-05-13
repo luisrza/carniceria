@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>Íconos — LA CARNICERÍA · Gemini Batch</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: {
+      display: ['"Bebas Neue"', 'sans-serif'],
+      sans: ['Inter', 'system-ui', 'sans-serif'],
+      mono: ['"JetBrains Mono"', 'monospace'],
+    }}},
+  };
+</script>
+<style>
+  :root { --ink:#0a0a0a; --paper:#fafaf7; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--paper); color: var(--ink); }
+  body { -webkit-font-smoothing: antialiased; }
+  ::selection { background: #0a0a0a; color: #fafaf7; }
+
+  .copyable {
+    transition: background .15s ease, color .15s ease;
+  }
+  .copyable.copied {
+    background: #10b981 !important;
+    color: white !important;
+    border-color: #10b981 !important;
+  }
+
+  pre.prompt {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #fafaf7;
+    border: 2px solid #0a0a0a;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  pre.prompt-full {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  pre.prompt-full::-webkit-scrollbar { width: 6px; }
+  pre.prompt-full::-webkit-scrollbar-thumb { background: #0a0a0a; }
+
+  .filter-chip.is-active { background: #0a0a0a; color: #fafaf7; }
+
+  details summary { cursor: pointer; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] summary .chevron { transform: rotate(90deg); }
+  .chevron { transition: transform .15s ease; display: inline-block; }
+</style>
+</head>
+<body class="font-sans">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-30 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur">
+  <div class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
+    <a href="/" class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M6 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7H6V10Z" fill="#0a0a0a"/>
+        <path d="M16 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7h-3V10Z" fill="#0a0a0a"/>
+      </svg>
+      <span class="font-display text-xl tracking-wider">LA CARNICERÍA</span>
+    </a>
+    <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-700">Icon Batch · Gemini</span>
+  </div>
+</header>
+
+<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+
+  <!-- TITLE -->
+  <div class="mb-8">
+    <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Especificación</div>
+    <h1 class="font-display text-5xl tracking-tight md:text-7xl">28 ÍCONOS<br/>PARA GEMINI</h1>
+    <p class="mt-3 max-w-2xl text-sm text-neutral-700 md:text-base">
+      Lista lista para copiar en Gemini. Cada ícono trae su prompt, paleta y referencia visual del estilo actual.
+      Pega primero el <strong>style preamble</strong>, luego el <strong>subject</strong> de cada ícono.
+    </p>
+  </div>
+
+  <!-- STATS -->
+  <div class="mb-8 grid grid-cols-3 gap-2 sm:grid-cols-5">
+    <div class="border-2 border-black bg-white p-3 text-center"><div class="font-display text-3xl">8</div><div class="font-mono text-[9px] uppercase tracking-widest text-neutral-500">Carnes</div></div>
+    <div class="border-2 border-black bg-white p-3 text-center"><div class="font-display text-3xl">3</div><div class="font-mono text-[9px] uppercase tracking-widest text-neutral-500">Salchichas</div></div>
+    <div class="border-2 border-black bg-white p-3 text-center"><div class="font-display text-3xl">8</div><div class="font-mono text-[9px] uppercase tracking-widest text-neutral-500">Sides</div></div>
+    <div class="border-2 border-black bg-white p-3 text-center"><div class="font-display text-3xl">5</div><div class="font-mono text-[9px] uppercase tracking-widest text-neutral-500">Salsas</div></div>
+    <div class="border-2 border-black bg-white p-3 text-center"><div class="font-display text-3xl">4</div><div class="font-mono text-[9px] uppercase tracking-widest text-neutral-500">Bebidas</div></div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="mb-6 flex flex-wrap gap-2">
+    <button data-filter="all" class="filter-chip is-active border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Todo (28)</button>
+    <button data-filter="meat" class="filter-chip border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Carnes (8)</button>
+    <button data-filter="sausage" class="filter-chip border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Salchichas (3)</button>
+    <button data-filter="side" class="filter-chip border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Sides (8)</button>
+    <button data-filter="sauce" class="filter-chip border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Salsas (5)</button>
+    <button data-filter="drink" class="filter-chip border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest">Bebidas (4)</button>
+  </div>
+
+  <!-- ICON GRID -->
+  <div id="icons" class="grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
+
+  <!-- DOWNLOAD ALL -->
+  <div class="mt-12 border-2 border-black bg-white p-5 sm:p-8">
+    <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Bonus</div>
+        <h2 class="font-display text-3xl">DESCARGAR TODOS LOS PROMPTS</h2>
+        <p class="mt-1 text-sm text-neutral-700">Un solo archivo .txt con preamble + 28 prompts numerados.</p>
+      </div>
+      <button id="download-all" class="border-2 border-black bg-black px-5 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800">
+        Descargar prompts.txt ↓
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast" class="fixed left-3 right-3 top-20 z-[60] mx-auto hidden max-w-md border-2 border-black bg-black px-4 py-3 text-center text-sm font-medium text-white shadow-[4px_4px_0_0_#0a0a0a]"></div>
+
+<script>
+//
+// ============== ICON SPEC ==============
+//
+const ICONS = [
+  // ===== CARNES (8) =====
+  {
+    n: 1, id: 'special-plate', cat: 'meat', label: 'Special Plate',
+    usedBy: 'Wed & Thu Special',
+    colors: ['#0A0A0A', '#FAFAF7', '#9B3A2A', '#7A1A1A', '#E8C44A'],
+    altEs: 'Plato cuadrado con dos tiras de fajita y una salchicha curva',
+    altEn: 'Square plate with two fajita strips and one curved sausage',
+    prompt: 'A square white plate viewed from directly above with two horizontal strips of charcoal-grilled fajita meat in deep red-brown (#9B3A2A) and one curled segment of smoked sausage in dark red (#7A1A1A) neatly arranged. Small yellow garnish dot (#E8C44A) in the corner. Bold black plate outline.',
+  },
+  {
+    n: 2, id: 'pollo', cat: 'meat', label: 'Pollo (Chicken)',
+    usedBy: 'Chicken Fajita ×2',
+    colors: ['#0A0A0A', '#D4A566', '#7A4A20'],
+    altEs: 'Muslo de pollo asado dorado con marcas de parrilla',
+    altEn: 'Golden grilled chicken thigh with grill marks',
+    prompt: 'A whole grilled chicken thigh viewed front-on, warm golden color (#D4A566), rounded compact silhouette, two subtle dark brown grill marks (#7A4A20) across the surface, one small black eye dot. Bold black outline.',
+  },
+  {
+    n: 3, id: 'arrachera', cat: 'meat', label: 'Arrachera (Beef Fajita)',
+    usedBy: 'Beef Fajita ×2',
+    colors: ['#0A0A0A', '#9B3A2A', '#FAFAF7'],
+    altEs: 'Corte de arrachera alargado con marcas de parrilla',
+    altEn: 'Long skirt steak with diagonal grill marks',
+    prompt: 'A long elongated skirt steak (arrachera cut), gentle horizontal S-curve, deep red-brown (#9B3A2A), with five thin diagonal off-white grill-mark stripes (#FAFAF7). Bold black outline.',
+  },
+  {
+    n: 4, id: 'mixto', cat: 'meat', label: 'Mixto (Mixed Plate)',
+    usedBy: 'Mixto Ganadera, Mixto Meat, Mixto Norteño',
+    colors: ['#0A0A0A', '#FAFAF7', '#9B3A2A', '#7A1A1A', '#D4A566', '#3A8A3A'],
+    altEs: 'Plato redondo con tres tipos de carne mixta y guarnición',
+    altEn: 'Round plate with three mixed meats and a garnish',
+    prompt: 'A round white plate viewed from directly above containing three pieces arranged: a red beef strip (#9B3A2A), a curled sausage (#7A1A1A), and a chicken piece (#D4A566), with a small green herb dot (#3A8A3A) for garnish. Bold black plate rim.',
+  },
+  {
+    n: 5, id: 'costilla', cat: 'meat', label: 'Costilla (Ribs)',
+    usedBy: 'Costillitas ×2',
+    colors: ['#0A0A0A', '#7A2A18', '#F4ECDC'],
+    altEs: 'Costillas de cerdo con tres huesos visibles',
+    altEn: 'Pork ribs slab with three visible bones',
+    prompt: 'A rectangular slab of pork ribs viewed front-on, deep brown meat base (#7A2A18), with three horizontal cream-white rib bones (#F4ECDC) cutting across the slab. Bold black outline, slight rounded corners.',
+  },
+  {
+    n: 6, id: 'newyork', cat: 'meat', label: 'NY Strip / Aguja',
+    usedBy: 'Aguja Norteña ×2',
+    colors: ['#0A0A0A', '#B04535', '#F4ECDC'],
+    altEs: 'Corte rectangular de aguja con tira de grasa',
+    altEn: 'Rectangular strip cut with fat strip on one side',
+    prompt: 'A rectangular New York strip / aguja steak viewed from above, deep red color (#B04535), with a vertical strip of cream-colored fat (#F4ECDC) along the left side. Bold black border, slightly rounded corners.',
+  },
+  {
+    n: 7, id: 'ribeye', cat: 'meat', label: 'Ribeye / Sirloin',
+    usedBy: 'Sirloin ×2',
+    colors: ['#0A0A0A', '#C45A4A', '#F4D2C0'],
+    altEs: 'Corte ovalado de ribeye con marmoleo visible',
+    altEn: 'Oval ribeye cut with visible marbling',
+    prompt: 'An oval ribeye steak viewed from directly above, marbled deep red (#C45A4A), with three small pale circular marbling dots (#F4D2C0) scattered across the surface. Bold thick black outline.',
+  },
+  {
+    n: 8, id: 'tbone', cat: 'meat', label: 'T-Bone',
+    usedBy: 'Laminita de León ×2',
+    colors: ['#0A0A0A', '#C45A4A', '#F4ECDC'],
+    altEs: 'Corte T-bone con hueso central en forma de T',
+    altEn: 'T-bone steak with distinctive T-shaped center bone',
+    prompt: 'A T-bone steak viewed from above, distinctive T-shaped cream-white bone (#F4ECDC) dividing two sections of red beef (#C45A4A) — a smaller filet section and a larger strip section. Bold black outline.',
+  },
+
+  // ===== SALCHICHAS (3) =====
+  {
+    n: 9, id: 'chorizo', cat: 'sausage', label: 'Smoked Sausage',
+    usedBy: 'Smoked Sausage 1lb',
+    colors: ['#0A0A0A', '#7A1A1A', '#F4D2C0'],
+    altEs: 'Salchicha curva ahumada en color rojo profundo',
+    altEn: 'Curved smoked sausage in deep red',
+    prompt: 'A curled sausage link in deep red (#7A1A1A), gentle S-curve horizontal shape, with five small vertical tie marks dividing the link into segments. Three tiny pale dots (#F4D2C0) for texture. Bold black outline.',
+  },
+  {
+    n: 10, id: 'chorizo-cheddar', cat: 'sausage', label: 'Cheddar Sausage',
+    usedBy: 'Cheddar Smoked Sausage 1lb',
+    colors: ['#0A0A0A', '#A8602A', '#E8C44A'],
+    altEs: 'Salchicha curva color ámbar con trozos de queso cheddar',
+    altEn: 'Curved amber sausage with yellow cheddar specks',
+    prompt: 'A curled sausage link in caramel-amber color (#A8602A), same S-curve as previous sausage, with three bright yellow cheese specks (#E8C44A) scattered along the link. Vertical tie marks. Bold black outline.',
+  },
+  {
+    n: 11, id: 'chorizo-jalapeno', cat: 'sausage', label: 'Jalapeño & Cheddar Sausage',
+    usedBy: 'Jalapeño & Cheddar Sausage 1lb',
+    colors: ['#0A0A0A', '#A8602A', '#E8C44A', '#3A8A3A'],
+    altEs: 'Salchicha ámbar con queso amarillo y jalapeño verde',
+    altEn: 'Amber sausage with yellow cheese and green jalapeño bits',
+    prompt: 'A curled sausage link in caramel-amber (#A8602A), same S-curve silhouette, with three yellow cheese specks (#E8C44A) AND two small bright green jalapeño bits (#3A8A3A). Vertical tie marks. Bold black outline.',
+  },
+
+  // ===== SIDES (8) =====
+  {
+    n: 12, id: 'chili', cat: 'side', label: 'Ratones (Stuffed Jalapeños)',
+    usedBy: 'Ratones',
+    colors: ['#0A0A0A', '#3A8A3A', '#5A4A2A', '#F4ECDC'],
+    altEs: 'Jalapeño relleno verde con queso visible',
+    altEn: 'Green stuffed jalapeño with visible cheese filling',
+    prompt: 'A bright green stuffed jalapeño pepper (#3A8A3A) standing vertically, brown stem at top (#5A4A2A), with cream-white cheese filling (#F4ECDC) peeking through a vertical slit in the front. Bold black outline.',
+  },
+  {
+    n: 13, id: 'onion', cat: 'side', label: 'Grilled Onion',
+    usedBy: 'Grilled Onion',
+    colors: ['#0A0A0A', '#FAFAF7', '#D8B167', '#3A5A2A'],
+    altEs: 'Cebolla asada vista desde arriba con anillos concéntricos',
+    altEn: 'Grilled onion ring viewed from above with concentric rings',
+    prompt: 'A grilled onion viewed from directly above, off-white concentric rings (#FAFAF7) with golden caramelized edges (#D8B167), two small green chive sprigs (#3A5A2A) on top crossing each other. Bold black outline.',
+  },
+  {
+    n: 14, id: 'chips', cat: 'side', label: 'Chips Bag',
+    usedBy: 'Ganadera Chips',
+    colors: ['#0A0A0A', '#D8B167', '#7A4A1A'],
+    altEs: 'Bolsa trapezoidal de chips de tortilla doradas',
+    altEn: 'Trapezoidal bag of golden tortilla chips',
+    prompt: 'A trapezoidal bag of tortilla chips, golden-tan body (#D8B167), with five visible brown chip-triangle shapes inside (#7A4A1A). Sealed top edge with crimped detail. Bold black outline.',
+  },
+  {
+    n: 15, id: 'side-frijol', cat: 'side', label: 'Charro Beans',
+    usedBy: 'Charro Beans (8oz, 16oz, addon)',
+    colors: ['#0A0A0A', '#5A3210', '#3A1A08'],
+    altEs: 'Tazón ovalado con frijoles charros oscuros',
+    altEn: 'Oval bowl filled with dark charro beans',
+    prompt: 'A wide oval bowl viewed front-on, filled with dark brown beans (#5A3210), with four darker bean shapes visible inside (#3A1A08). Bold black bowl outline.',
+  },
+  {
+    n: 16, id: 'chicharron', cat: 'side', label: 'Chicharrón',
+    usedBy: 'Chicharrón Salsa Verde',
+    colors: ['#0A0A0A', '#7A3A1A', '#3A8A3A'],
+    altEs: 'Chicharrón irregular con drizzle de salsa verde',
+    altEn: 'Puffy fried pork rind with green salsa drizzle',
+    prompt: 'A puffy fried pork rind in caramel-brown (#7A3A1A), irregular cloud-like organic shape, with three bright green salsa verde drizzle lines on top (#3A8A3A). Bold black outline.',
+  },
+  {
+    n: 17, id: 'side-papa', cat: 'side', label: 'Papa Asada',
+    usedBy: 'Papa Asada',
+    colors: ['#0A0A0A', '#D8B167', '#7A4A1A'],
+    altEs: 'Papa asada ovalada con piel dorada y manchas',
+    altEn: 'Oval baked potato with golden skin and spots',
+    prompt: 'An oval baked potato horizontal orientation, golden-tan skin (#D8B167) with three darker brown spots (#7A4A1A), slightly cracked top showing texture. Bold black outline.',
+  },
+  {
+    n: 18, id: 'fajipapa', cat: 'side', label: 'Fajipapa',
+    usedBy: 'Fajipapa',
+    colors: ['#0A0A0A', '#D8B167', '#9B3A2A', '#FAFAF7'],
+    altEs: 'Papa asada coronada con fajita y crema',
+    altEn: 'Baked potato topped with fajita meat and cream',
+    prompt: 'An oval baked potato horizontal orientation (golden-tan #D8B167) topped with three chunks of red-brown fajita meat (#9B3A2A) and two small white cream/cheese dots (#FAFAF7). Bold black potato outline.',
+  },
+  {
+    n: 19, id: 'rice', cat: 'side', label: 'Rice Bowl',
+    usedBy: 'Arroz Caliente (8/16/32 oz)',
+    colors: ['#0A0A0A', '#FAFAF7', '#D8C89A'],
+    altEs: 'Tazón ancho con arroz blanco y vapor',
+    altEn: 'Wide bowl with white rice and steam curl',
+    prompt: 'A wide trapezoidal rice bowl viewed front-on, filled with off-white rice (#FAFAF7), with eight small tan grain dots (#D8C89A) visible. A thin steam curl line rising above the bowl. Bold black bowl outline.',
+  },
+
+  // ===== SAUCES (5) =====
+  {
+    n: 20, id: 'side-tortilla', cat: 'sauce', label: 'Corn Tortillas',
+    usedBy: 'Corn Tortillas (10 pcs)',
+    colors: ['#0A0A0A', '#E8C890', '#A87A40'],
+    altEs: 'Tortilla de maíz circular amarilla con manchas',
+    altEn: 'Round yellow corn tortilla with dark specks',
+    prompt: 'A perfect circle representing a stack of corn tortillas viewed from directly above, warm yellow-tan color (#E8C890) with six small darker brown speckles (#A87A40) randomly distributed. Bold black circular outline.',
+  },
+  {
+    n: 21, id: 'tortilla-flour', cat: 'sauce', label: 'Flour Tortillas',
+    usedBy: 'Flour Tortillas (20 pcs)',
+    colors: ['#0A0A0A', '#F4ECDC', '#C8B890'],
+    altEs: 'Tortilla de harina circular color crema con manchas suaves',
+    altEn: 'Round cream-colored flour tortilla with subtle specks',
+    prompt: 'A perfect circle representing a stack of flour tortillas viewed from directly above, pale cream color (#F4ECDC) with six subtle tan specks (#C8B890) randomly distributed. Bold black circular outline.',
+  },
+  {
+    n: 22, id: 'salsa-bottle', cat: 'sauce', label: 'Salsa Bottle (×5 colores)',
+    usedBy: 'Salsa Roja, Avocado, Naranja, Verde Tatemada, Verde Clara',
+    colors: ['#0A0A0A', '#FAFAF7', '#9B3A2A', '#7A9A3A', '#C25A1A', '#3A5A2A'],
+    altEs: 'Botella geométrica de salsa con etiqueta blanca (5 variantes de color)',
+    altEn: 'Geometric salsa bottle silhouette with white label (5 color variants)',
+    prompt: 'A tall geometric salsa bottle silhouette with narrow neck and rounded shoulders, deep red body (#9B3A2A), with a rectangular white label (#FAFAF7) across the middle showing two thin black horizontal lines (no actual text). Bold black outline.\n\nGenera 4 variantes adicionales con el MISMO silueta exacta cambiando solo el color del cuerpo:\n• Avocado: #7A9A3A\n• Naranja: #C25A1A\n• Verde Tatemada: #3A5A2A\n• Verde Clara: #7A9A3A (más brillante)',
+  },
+  {
+    n: 23, id: 'pico', cat: 'sauce', label: 'Pico de Gallo',
+    usedBy: 'Pico de Gallo',
+    colors: ['#0A0A0A', '#FAFAF7', '#C43A2A', '#3A8A3A'],
+    altEs: 'Tazón redondo con pico de gallo en cubitos',
+    altEn: 'Round bowl with diced pico de gallo',
+    prompt: 'A round bowl viewed from directly above, filled with diced pico de gallo: four small red tomato squares (#C43A2A), three small white onion squares (#FAFAF7 with thin black outline), three small green cilantro squares (#3A8A3A), all evenly distributed. Bold black bowl outline.',
+  },
+  {
+    n: 24, id: 'side-guaca', cat: 'sauce', label: 'Guacamole',
+    usedBy: 'Guacamole',
+    colors: ['#0A0A0A', '#7A9A3A', '#3A4A1A', '#C43A2A', '#FAFAF7'],
+    altEs: 'Tazón redondo con guacamole verde y hueso oscuro',
+    altEn: 'Round bowl with bright green guacamole and dark pit',
+    prompt: 'A round bowl viewed from directly above, filled with bright green guacamole (#7A9A3A), a dark green avocado pit shape at the center (#3A4A1A), with two small red tomato dots (#C43A2A) and two tiny white onion specks (#FAFAF7). Bold black bowl outline.',
+  },
+
+  // ===== DRINKS (4) =====
+  {
+    n: 25, id: 'soda-can', cat: 'drink', label: 'Soda Can',
+    usedBy: 'Joya Fruit Punch / Durazno / Manzanita',
+    colors: ['#0A0A0A', '#FAFAF7', '#C43A2A', '#9A9A9A'],
+    altEs: 'Lata vertical de aluminio con etiqueta blanca y tapa',
+    altEn: 'Vertical aluminum soda can with white label band',
+    prompt: 'A vertical aluminum soda can, deep red body (#C43A2A), with a horizontal off-white label band across the middle (#FAFAF7) showing two thin black horizontal lines (no actual text). Dark grey pull tab on top (#9A9A9A). Bold black can outline with rounded top and bottom rims.',
+  },
+  {
+    n: 26, id: 'soda-bottle', cat: 'drink', label: 'Soda Bottle 20oz',
+    usedBy: 'Coca, Sprite, Dr Pepper, Coke Zero, Diet (20oz) + Coca Mexicana',
+    colors: ['#0A0A0A', '#FAFAF7', '#7A3A1A', '#C43A2A'],
+    altEs: 'Botella plástica de refresco 20oz con tapa rosca y etiqueta',
+    altEn: '20oz plastic soda bottle with screw cap and label',
+    prompt: 'A 20oz plastic soda bottle silhouette with screw cap on top, amber-brown body (#7A3A1A), narrow neck transitioning to wider body, rectangular off-white label (#FAFAF7) across the middle with one thin red horizontal stripe (#C43A2A) and two thin black lines below. Bold black outline.',
+  },
+  {
+    n: 27, id: 'soda-2l', cat: 'drink', label: 'Soda 2L',
+    usedBy: 'Manzanita, Coke Zero, Dr Pepper (2L) + Coca, Joya, Fresca, Manzana (2.5L)',
+    colors: ['#0A0A0A', '#FAFAF7', '#3A3A3A', '#C43A2A'],
+    altEs: 'Botella plástica grande de 2 litros con etiqueta amplia',
+    altEn: 'Tall 2-liter plastic soda bottle with wide label',
+    prompt: 'A tall 2-liter plastic soda bottle with screw cap on top, dark grey body (#3A3A3A), narrow neck flaring to wider body, large off-white rectangular label (#FAFAF7) across the middle with a thin red horizontal accent stripe (#C43A2A) and two thin black lines. Taller proportions than 20oz bottle. Bold black outline.',
+  },
+  {
+    n: 28, id: 'soda-pack', cat: 'drink', label: '12-Pack',
+    usedBy: 'Coca, Sprite, Diet Coke 12-packs',
+    colors: ['#0A0A0A', '#FAFAF7', '#C43A2A'],
+    altEs: 'Caja rectangular de 12-pack con asa en la parte superior',
+    altEn: 'Rectangular 12-pack box with handle on top',
+    prompt: 'A rectangular 12-pack soda box viewed from front, deep red color (#C43A2A), with a 4×3 grid pattern (vertical and horizontal black divider lines) showing 12 small white circles (#FAFAF7) representing can tops. A black carry handle arch on top of the box. Bold black box outline.',
+  },
+];
+
+const PREAMBLE = `Minimalist flat vector icon, editorial brutalist style. Strict rules:
+- Pure off-white background (#FAFAF7), subject perfectly centered, square 1:1 composition
+- Bold thick black outlines, 3–4px stroke weight, high contrast
+- SOLID flat color fills only — NO gradients, NO shadows, NO 3D, NO photorealism, NO textures
+- Strict color palette: black (#0A0A0A), off-white (#FAFAF7), plus the accent colors specified
+- Geometric simplification, clean shapes, generous padding (subject fills ~70% of frame)
+- NO text, letters, numbers, watermarks, or signatures
+- Style reference: Saul Bass, Massimo Vignelli, vintage butcher shop signage, Bauhaus pictograms
+
+Subject:
+`;
+
+//
+// ============== SVG PREVIEWS (mismas que en index.html) ==============
+//
+const ICON_MAP = {
+  'special-plate':'001','pollo':'002','arrachera':'003','mixto':'004','costilla':'005',
+  'newyork':'006','ribeye':'007','tbone':'008',
+  'chorizo':'009','chorizo-cheddar':'010','chorizo-jalapeno':'011',
+  'chili':'012','onion':'013','chips':'014','side-frijol':'015','chicharron':'016',
+  'side-papa':'017','fajipapa':'018','rice':'019',
+  'side-tortilla':'020','tortilla-flour':'021',
+  'salsa-bottle':'022','salsa-bottle-avocado':'023','salsa-bottle-naranja':'024',
+  'salsa-bottle-tatemada':'025','salsa-bottle-clara':'026',
+  'pico':'027','side-guaca':'028',
+  'soda-can':'029','soda-bottle':'030','soda-2l':'031','soda-pack':'032',
+};
+function svgIcon(kind, size = 64) {
+  const num = ICON_MAP[kind];
+  if (!num) return `<div style="width:${size}px;height:${size}px;background:#0a0a0a;"></div>`;
+  return `<img src="/icons/${num}.png" width="${size}" height="${size}" alt="" loading="lazy" style="display:block;object-fit:contain;" />`;
+}
+
+//
+// ============== RENDER ==============
+//
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+function categoryLabel(cat) {
+  const map = { meat: 'Carne', sausage: 'Salchicha', side: 'Side', sauce: 'Salsa', drink: 'Bebida' };
+  return map[cat] || cat;
+}
+
+function iconCard(icon) {
+  const colorChips = icon.colors.map(c => `
+    <span class="inline-flex items-center gap-1 border border-black bg-white px-1.5 py-0.5 font-mono text-[10px]">
+      <span class="inline-block h-2.5 w-2.5 border border-black" style="background:${c}"></span>${c}
+    </span>
+  `).join('');
+
+  return `
+    <article data-cat="${icon.cat}" class="border-2 border-black bg-white">
+      <header class="flex items-start gap-4 border-b-2 border-black p-4">
+        <div class="flex h-20 w-20 shrink-0 items-center justify-center border-2 border-black bg-[var(--paper)]">
+          ${svgIcon(icon.id, 64)}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+            <span>#${String(icon.n).padStart(2, '0')}</span>
+            <span class="border border-black bg-white px-1.5">${categoryLabel(icon.cat)}</span>
+            <span class="font-mono">${icon.id}</span>
+          </div>
+          <h3 class="mt-1 font-display text-2xl leading-tight">${icon.label}</h3>
+          <div class="mt-1 text-xs text-neutral-700"><span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Used by:</span> ${icon.usedBy}</div>
+        </div>
+      </header>
+
+      <div class="border-b-2 border-black p-4">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 mb-2">Paleta</div>
+        <div class="flex flex-wrap gap-1">${colorChips}</div>
+      </div>
+
+      <div class="border-b-2 border-black p-4">
+        <details>
+          <summary class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+            <span class="chevron">▶</span>
+            <span>Alt text · ES + EN</span>
+          </summary>
+          <div class="mt-2 space-y-1 text-sm">
+            <div><span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">ES:</span> ${icon.altEs}</div>
+            <div><span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">EN:</span> ${icon.altEn}</div>
+          </div>
+        </details>
+      </div>
+
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Prompt completo · listo para Gemini</div>
+          <button data-copy-icon="${icon.id}" class="copyable border-2 border-black bg-black px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-neutral-800">
+            Copiar
+          </button>
+        </div>
+        <pre class="prompt prompt-full">${PREAMBLE}${icon.prompt}</pre>
+      </div>
+    </article>
+  `;
+}
+
+function render() {
+  $('#icons').innerHTML = ICONS.map(iconCard).join('');
+  attachCopyButtons();
+}
+
+function attachCopyButtons() {
+  // Copy preamble
+  $$('[data-copy="preamble"]').forEach(btn => {
+    btn.addEventListener('click', () => copy(PREAMBLE, btn));
+  });
+  // Copy each icon's full prompt (preamble + subject)
+  $$('[data-copy-icon]').forEach(btn => {
+    const id = btn.dataset.copyIcon;
+    const icon = ICONS.find(i => i.id === id);
+    if (!icon) return;
+    btn.addEventListener('click', () => {
+      const fullPrompt = PREAMBLE + '\n' + icon.prompt;
+      copy(fullPrompt, btn);
+    });
+  });
+}
+
+async function copy(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.classList.add('copied');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = original;
+    }, 1500);
+    showToast('Prompt copiado al portapapeles');
+  } catch (e) {
+    showToast('Error al copiar', true);
+  }
+}
+
+function showToast(msg, isError = false) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = `fixed left-3 right-3 top-20 z-[60] mx-auto max-w-md border-2 border-black px-4 py-3 text-center text-sm font-medium shadow-[4px_4px_0_0_#0a0a0a] ${isError ? 'bg-red-600 text-white' : 'bg-black text-white'}`;
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.add('hidden'), 1800);
+}
+
+// FILTER
+$$('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    $$('.filter-chip').forEach(b => b.classList.toggle('is-active', b === btn));
+    $$('#icons > article').forEach(card => {
+      card.style.display = (f === 'all' || card.dataset.cat === f) ? '' : 'none';
+    });
+  });
+});
+
+// DOWNLOAD ALL
+$('#download-all').addEventListener('click', () => {
+  let txt = '═══════════════════════════════════════════════════\n';
+  txt += '  LA CARNICERÍA — 28 ICONS · GEMINI BATCH PROMPTS\n';
+  txt += '═══════════════════════════════════════════════════\n\n';
+  txt += '── STYLE PREAMBLE (prepend to every prompt below) ──\n\n';
+  txt += PREAMBLE + '\n\n';
+  txt += '═══════════════════════════════════════════════════\n\n';
+  ICONS.forEach(icon => {
+    txt += `── #${String(icon.n).padStart(2, '0')} · ${icon.label} (${icon.id}) ──\n`;
+    txt += `Category: ${categoryLabel(icon.cat)}\n`;
+    txt += `Used by:  ${icon.usedBy}\n`;
+    txt += `Colors:   ${icon.colors.join(', ')}\n`;
+    txt += `Alt ES:   ${icon.altEs}\n`;
+    txt += `Alt EN:   ${icon.altEn}\n\n`;
+    txt += `Prompt (paste after preamble):\n${icon.prompt}\n\n`;
+    txt += '─────────────────────────────────────────────────\n\n';
+  });
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'carniceria-icons-prompts.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('prompts.txt descargado');
+});
+
+render();
+</script>
+</body>
+</html>

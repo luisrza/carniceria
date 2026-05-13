@@ -1,0 +1,1755 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>LA CARNICERÍA — Carne a la brasa</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Bebas Neue"', 'sans-serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root {
+    --ink:#0a0a0a; --paper:#fafaf7; --line:#0a0a0a;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --header-h: 56px;
+    --tabs-h: 52px;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--paper); color: var(--ink); }
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overscroll-behavior-y: none; }
+  body.has-cart-bar { padding-bottom: calc(72px + var(--safe-bottom)); }
+  @media (min-width: 768px) {
+    body.has-cart-bar { padding-bottom: 0; }
+  }
+
+  /* Snap section offsets so anchors don't hide under sticky bars */
+  section[id] { scroll-margin-top: calc(var(--header-h) + var(--tabs-h) + 8px); }
+
+  .grain {
+    background-image:
+      radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+  }
+
+  /* Touch-friendly buttons */
+  .tap { min-height: 48px; min-width: 48px; touch-action: manipulation; }
+  .tap-sm { min-height: 40px; min-width: 40px; touch-action: manipulation; }
+  button, a { touch-action: manipulation; }
+
+  /* Hover effects only on devices with hover */
+  @media (hover: hover) {
+    .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+    .card-hover:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 0 var(--ink); }
+    .card-hover:hover .add-pill { background: var(--ink); color: var(--paper); }
+    .btn-primary { transition: transform .12s ease, box-shadow .12s ease; }
+    .btn-primary:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 0 var(--ink); }
+  }
+  .btn-primary:active { transform: scale(.97); transition: transform .08s ease; }
+  .card-press:active { transform: scale(.98); transition: transform .08s ease; }
+  .card-press:active .add-pill { background: var(--ink); color: var(--paper); transform: scale(.92); }
+  .add-pill { transition: background .12s ease, color .12s ease, transform .1s ease; }
+
+  .swatch { transition: transform .15s ease; }
+  .swatch.is-active { outline: 3px solid var(--ink); outline-offset: 4px; }
+  .chip { transition: background .12s ease, color .12s ease, transform .12s ease; }
+  .chip.is-active { background: var(--ink); color: var(--paper); }
+  .lang-btn.is-active { background: var(--ink); color: var(--paper); }
+
+  /* Item modal: bottom sheet on mobile, RIGHT side panel on desktop */
+  .sheet { transition: transform .35s cubic-bezier(.2,.8,.2,1); transform: translateY(100%); }
+  .sheet.is-open { transform: translateY(0); }
+  @media (min-width: 768px) {
+    .sheet { transition: transform .35s cubic-bezier(.2,.8,.2,1); transform: translateX(100%); opacity: 1; }
+    .sheet.is-open { transform: translateX(0); }
+  }
+  .scrim { transition: opacity .25s ease; }
+  /* Lighter scrim on desktop since modal becomes a side panel */
+  @media (min-width: 768px) {
+    #item-modal-scrim { background: rgba(0,0,0,.18); }
+  }
+
+  /* Cart drawer */
+  .drawer { transition: transform .35s cubic-bezier(.2,.8,.2,1); transform: translateY(100%); }
+  .drawer.is-open { transform: translateY(0); }
+  @media (min-width: 768px) {
+    .drawer { transform: translateX(100%); }
+    .drawer.is-open { transform: translateX(0); }
+  }
+
+  /* Toasts */
+  .toast { animation: toast-in .3s cubic-bezier(.2,.8,.2,1); }
+  @keyframes toast-in { from { transform: translateY(-12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast-out { animation: toast-out .25s ease forwards; }
+  @keyframes toast-out { to { transform: translateY(-8px) scale(.98); opacity: 0; } }
+
+  /* Pulse */
+  .pulse-dot::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 9999px; background: currentColor; opacity: .35;
+    animation: pulse 1.6s ease-out infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(.8); opacity: .5; } 100% { transform: scale(2.2); opacity: 0; } }
+
+  /* Drag handle */
+  .drag-handle::before {
+    content: ""; display: block; margin: 8px auto 4px;
+    width: 40px; height: 4px; border-radius: 2px;
+    background: rgba(0,0,0,.25);
+  }
+
+  /* Hide scrollbars */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  ::selection { background: #0a0a0a; color: #fafaf7; }
+
+  .stripe-bg { background-image: repeating-linear-gradient(45deg, #0a0a0a 0 8px, transparent 8px 22px); }
+
+  /* Cart bar slide */
+  .cartbar { transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .cartbar.is-visible { transform: translateY(0); }
+
+  /* Tabs underline */
+  .tab-link { position: relative; }
+  .tab-link.is-active::after {
+    content: ""; position: absolute; left: 12px; right: 12px; bottom: 0;
+    height: 3px; background: var(--ink);
+  }
+
+  /* Pop animation */
+  .pop-in { animation: pop-in .25s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pop-in { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+</head>
+<body class="font-sans">
+
+<!-- ===== HEADER (compact, sticky) ===== -->
+<header class="sticky top-0 z-40 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur" style="height: var(--header-h)">
+  <div class="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
+    <a href="#" class="flex items-center gap-2 tap">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <path d="M6 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7H6V10Z" fill="#0a0a0a"/>
+        <path d="M16 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7h-3V10Z" fill="#0a0a0a"/>
+        <circle cx="11" cy="9" r="1.2" fill="#fafaf7"/>
+        <circle cx="21" cy="9" r="1.2" fill="#fafaf7"/>
+      </svg>
+      <span class="font-display text-xl tracking-wider sm:text-2xl">LA CARNICERÍA</span>
+    </a>
+
+    <div class="flex items-center gap-2">
+      <div class="flex border-2 border-black overflow-hidden">
+        <button data-lang="es" class="lang-btn tap-sm px-2.5 text-[11px] font-bold uppercase tracking-widest">ES</button>
+        <button data-lang="en" class="lang-btn tap-sm px-2.5 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black">EN</button>
+      </div>
+      <button id="open-cart-desktop" class="hidden md:flex group relative items-center gap-2 border-2 border-black bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square">
+          <path d="M3 5h3l2.4 12.4a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.6L21.5 9H7"/>
+        </svg>
+        <span data-i18n="nav.cart"></span>
+        <span id="cart-count-desktop" class="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-black px-1 text-[10px] font-bold text-white">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== TABS NAV (sticky under header) ===== -->
+<nav class="sticky z-30 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur" style="top: var(--header-h); height: var(--tabs-h)">
+  <div id="tabs" class="no-scrollbar mx-auto flex h-full max-w-7xl items-stretch overflow-x-auto px-2 sm:px-4">
+    <a href="#special"  data-tab="special"  class="tab-link flex shrink-0 items-center px-3 text-xs font-bold uppercase tracking-widest" data-i18n="nav.special"></a>
+    <a href="#paquetes" data-tab="paquetes" class="tab-link flex shrink-0 items-center px-3 text-xs font-bold uppercase tracking-widest" data-i18n="nav.packages"></a>
+    <a href="#parrilla" data-tab="parrilla" class="tab-link flex shrink-0 items-center px-3 text-xs font-bold uppercase tracking-widest" data-i18n="nav.grill"></a>
+    <a href="#salsas"   data-tab="salsas"   class="tab-link flex shrink-0 items-center px-3 text-xs font-bold uppercase tracking-widest" data-i18n="nav.sauces"></a>
+    <a href="#bebidas"  data-tab="bebidas"  class="tab-link flex shrink-0 items-center px-3 text-xs font-bold uppercase tracking-widest" data-i18n="nav.drinks"></a>
+  </div>
+</nav>
+
+<!-- ===== HERO (compact mobile, expanded desktop) ===== -->
+<section class="relative border-b-2 border-black grain">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+    <div class="grid gap-6 md:grid-cols-12 md:gap-8">
+      <div class="md:col-span-8">
+        <div class="mb-3 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-700">
+          <span class="inline-block h-px w-6 bg-black"></span>
+          <span data-i18n="hero.tagline"></span>
+        </div>
+        <h1 class="font-display text-5xl leading-[0.95] tracking-tight sm:text-6xl md:text-[7rem]" data-i18n-html="hero.title"></h1>
+        <p class="mt-4 max-w-xl text-sm text-neutral-700 md:mt-6 md:text-lg" data-i18n="hero.desc"></p>
+        <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
+          <a href="#paquetes" class="border-2 border-black bg-black px-5 py-4 text-center text-xs font-bold uppercase tracking-widest text-white btn-primary tap" data-i18n="hero.startOrder"></a>
+          <a href="#special" class="border-2 border-black bg-white px-5 py-4 text-center text-xs font-bold uppercase tracking-widest btn-primary tap" data-i18n="hero.seeSpecial"></a>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 md:col-span-4 md:grid-cols-1 md:gap-3">
+        <div class="border-2 border-black bg-white p-3 text-center md:p-4">
+          <div class="font-display text-2xl md:text-4xl">15</div>
+          <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500" data-i18n="hero.stat.packages"></div>
+        </div>
+        <div class="border-2 border-black bg-white p-3 text-center md:p-4">
+          <div class="font-display text-2xl md:text-4xl">06</div>
+          <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500" data-i18n="hero.stat.doneness"></div>
+        </div>
+        <div class="border-2 border-black bg-white p-3 text-center md:p-4">
+          <div class="font-display text-2xl md:text-4xl">19</div>
+          <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500" data-i18n="hero.stat.drinks"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS (compact strip on mobile) ===== -->
+<section class="border-b-2 border-black bg-white">
+  <div class="mx-auto grid max-w-7xl grid-cols-2 divide-x-2 divide-black md:grid-cols-4">
+    <div class="p-4 md:p-8">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">01</div>
+      <div class="mt-1 font-display text-xl md:text-2xl" data-i18n="how.01"></div>
+      <p class="mt-1 text-xs text-neutral-700 md:text-sm" data-i18n="how.01d"></p>
+    </div>
+    <div class="p-4 md:p-8">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">02</div>
+      <div class="mt-1 font-display text-xl md:text-2xl" data-i18n="how.02"></div>
+      <p class="mt-1 text-xs text-neutral-700 md:text-sm" data-i18n="how.02d"></p>
+    </div>
+    <div class="p-4 border-t-2 md:border-t-0 border-black md:p-8">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">03</div>
+      <div class="mt-1 font-display text-xl md:text-2xl" data-i18n="how.03"></div>
+      <p class="mt-1 text-xs text-neutral-700 md:text-sm" data-i18n="how.03d"></p>
+    </div>
+    <div class="p-4 border-t-2 md:border-t-0 border-black md:p-8">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">04</div>
+      <div class="mt-1 font-display text-xl md:text-2xl" data-i18n="how.04"></div>
+      <p class="mt-1 text-xs text-neutral-700 md:text-sm" data-i18n="how.04d"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WED/THU SPECIAL (compact mobile) ===== -->
+<section id="special" class="border-b-2 border-black bg-[var(--paper)]">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12">
+    <div class="overflow-hidden border-2 border-black">
+      <div class="stripe-bg h-2 md:h-3"></div>
+      <div class="grid gap-0 md:grid-cols-12">
+        <div class="border-b-2 border-black bg-white p-5 md:col-span-7 md:border-b-0 md:border-r-2 md:p-10">
+          <div class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-neutral-600">
+            <span class="border border-black bg-amber-300 px-2 py-0.5 text-black" data-i18n="special.badge"></span>
+            <span data-i18n="special.tagline"></span>
+          </div>
+          <h2 class="mt-3 font-display text-4xl leading-[0.95] tracking-tight md:mt-4 md:text-7xl" data-i18n-html="special.title"></h2>
+          <p class="mt-3 max-w-md text-sm text-neutral-700 md:mt-4 md:text-base" data-i18n-html="special.desc"></p>
+          <div class="mt-4 flex items-end justify-between gap-3 border-t-2 border-black pt-4 md:mt-6 md:pt-6">
+            <div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="special.priceLabel"></div>
+              <div class="font-display text-5xl leading-none md:text-7xl">$38<span class="text-2xl md:text-3xl">.84</span></div>
+            </div>
+            <button id="add-special" class="border-2 border-black bg-black px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white btn-primary tap md:px-5 md:py-4 md:text-xs" data-i18n="special.cta"></button>
+          </div>
+        </div>
+        <div class="bg-black p-5 text-white md:col-span-5 md:p-10">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-400" data-i18n="special.includes"></div>
+          <ul class="mt-3 space-y-2 md:mt-4 md:space-y-3">
+            <li class="flex items-start gap-2 border-b border-white/15 pb-2 md:gap-3 md:pb-3">
+              <span class="mt-1.5 inline-block h-2 w-2 bg-amber-300 shrink-0"></span>
+              <div>
+                <div class="font-display text-lg md:text-xl" data-i18n="special.fajita.title"></div>
+                <div class="text-[11px] text-neutral-400" data-i18n="special.fajita.desc"></div>
+              </div>
+            </li>
+            <li class="flex items-start gap-2 border-b border-white/15 pb-2 md:gap-3 md:pb-3">
+              <span class="mt-1.5 inline-block h-2 w-2 bg-amber-300 shrink-0"></span>
+              <div>
+                <div class="font-display text-lg md:text-xl" data-i18n="special.sausage.title"></div>
+                <div class="text-[11px] text-neutral-400" data-i18n="special.sausage.desc"></div>
+              </div>
+            </li>
+            <li class="flex items-start gap-2 md:gap-3">
+              <span class="mt-1.5 inline-block h-2 w-2 bg-amber-300 shrink-0"></span>
+              <div>
+                <div class="font-display text-lg md:text-xl" data-i18n="special.term.title"></div>
+                <div class="text-[11px] text-neutral-400" data-i18n="special.term.desc"></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="stripe-bg h-2 md:h-3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAQUETES ===== -->
+<section id="paquetes" class="border-b-2 border-black">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+    <div class="mb-4 flex items-end justify-between md:mb-6">
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="sec.packages.label"></div>
+        <h2 class="font-display text-4xl tracking-tight md:text-6xl" data-i18n="sec.packages"></h2>
+      </div>
+      <div class="hidden text-right text-xs text-neutral-700 sm:block" data-i18n="sec.priceUsd"></div>
+    </div>
+
+    <!-- Sticky filter chips -->
+    <div class="sticky z-20 -mx-4 mb-4 border-b-2 border-black bg-[var(--paper)]/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6" style="top: calc(var(--header-h) + var(--tabs-h))">
+      <div class="no-scrollbar flex gap-2 overflow-x-auto">
+        <button data-filter="all" class="filter-chip chip is-active border-2 border-black px-4 tap-sm text-xs font-bold uppercase tracking-widest" data-i18n="filter.all"></button>
+        <button data-filter="pollo" class="filter-chip chip border-2 border-black px-4 tap-sm text-xs font-bold uppercase tracking-widest" data-i18n="filter.chicken"></button>
+        <button data-filter="res" class="filter-chip chip border-2 border-black px-4 tap-sm text-xs font-bold uppercase tracking-widest" data-i18n="filter.beef"></button>
+        <button data-filter="mixto" class="filter-chip chip border-2 border-black px-4 tap-sm text-xs font-bold uppercase tracking-widest" data-i18n="filter.mix"></button>
+      </div>
+    </div>
+
+    <div id="packages-grid" class="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4"></div>
+  </div>
+</section>
+
+<!-- ===== SIDES FROM THE GRILL ===== -->
+<section id="parrilla" class="border-b-2 border-black bg-black text-white">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+    <div class="mb-4 md:mb-6">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-400" data-i18n="sec.grill.label"></div>
+      <h2 class="font-display text-4xl tracking-tight md:text-6xl" data-i18n="sec.grill"></h2>
+      <p class="mt-1 max-w-xl text-xs text-neutral-400 md:mt-2 md:text-sm" data-i18n="sec.grill.desc"></p>
+    </div>
+    <div id="grill-grid" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+  </div>
+</section>
+
+<!-- ===== SAUCES & MORE ===== -->
+<section id="salsas" class="border-b-2 border-black">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+    <div class="mb-4 md:mb-6">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="sec.sauces.label"></div>
+      <h2 class="font-display text-4xl tracking-tight md:text-6xl" data-i18n="sec.sauces"></h2>
+      <p class="mt-1 max-w-xl text-xs text-neutral-700 md:mt-2 md:text-sm" data-i18n="sec.sauces.desc"></p>
+    </div>
+    <div id="sauces-grid-page" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+  </div>
+</section>
+
+<!-- ===== DRINKS ===== -->
+<section id="bebidas" class="border-b-2 border-black bg-white">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+    <div class="mb-4 md:mb-6">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="sec.drinks.label"></div>
+      <h2 class="font-display text-4xl tracking-tight md:text-6xl" data-i18n="sec.drinks"></h2>
+      <p class="mt-1 max-w-xl text-xs text-neutral-700 md:mt-2 md:text-sm" data-i18n="sec.drinks.desc"></p>
+    </div>
+
+    <div class="mb-2 mt-4 font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="drinks.individual"></div>
+    <div id="drinks-grid-individual" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+
+    <div class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="drinks.large"></div>
+    <div id="drinks-grid-large" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+
+    <div class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="drinks.packs"></div>
+    <div id="drinks-grid-packs" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="border-b-2 border-black bg-[var(--paper)]">
+  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 sm:flex-row sm:px-6">
+    <div class="flex items-center gap-2">
+      <span class="font-display text-lg tracking-wider sm:text-xl">LA CARNICERÍA</span>
+      <span class="text-[10px] font-mono uppercase tracking-widest text-neutral-600">© 2026</span>
+    </div>
+    <div class="text-[10px] font-mono uppercase tracking-widest text-neutral-600 sm:text-[11px]" data-i18n="foot.hours"></div>
+  </div>
+</footer>
+
+<!-- ===== STICKY BOTTOM CART BAR (mobile + tablet) ===== -->
+<div id="cart-bar" class="cartbar fixed bottom-0 left-0 right-0 z-40 border-t-2 border-black bg-[var(--ink)] text-white md:hidden" style="padding-bottom: var(--safe-bottom)">
+  <button id="open-cart-mobile" class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left">
+    <div class="flex items-center gap-3">
+      <div class="relative flex h-11 w-11 items-center justify-center border-2 border-white">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square">
+          <path d="M3 5h3l2.4 12.4a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.6L21.5 9H7"/>
+        </svg>
+        <span id="cart-count-mobile" class="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-300 px-1 font-mono text-[10px] font-bold text-black">0</span>
+      </div>
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-white/60" data-i18n="cart.subtitle"></div>
+        <div id="cart-bar-summary" class="font-display text-xl">—</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 border-2 border-white px-3 py-2 text-[11px] font-bold uppercase tracking-widest">
+      <span data-i18n="cart.viewOrder"></span>
+      <span>→</span>
+    </div>
+  </button>
+</div>
+
+<!-- ===== CART DRAWER (full-screen mobile, side desktop) ===== -->
+<div id="scrim" class="scrim pointer-events-none fixed inset-0 z-40 bg-black/40 opacity-0"></div>
+<aside id="cart-drawer" class="drawer fixed inset-x-0 bottom-0 top-0 z-50 flex w-full flex-col bg-[var(--paper)] md:left-auto md:right-0 md:top-0 md:max-w-md md:border-l-2 md:border-black">
+  <div class="flex items-center justify-between border-b-2 border-black px-4 py-3 md:px-5 md:py-4">
+    <div>
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="cart.subtitle"></div>
+      <div class="font-display text-2xl md:text-3xl" data-i18n="cart.title"></div>
+    </div>
+    <button id="close-cart" class="border-2 border-black bg-white tap px-3 text-xs font-bold uppercase tracking-widest btn-primary" data-i18n="cart.close"></button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto p-4 md:p-5"></div>
+  <div id="cart-summary" class="hidden border-t-2 border-black bg-white p-4 md:p-5" style="padding-bottom: calc(1rem + var(--safe-bottom))">
+    <!-- Customer name input -->
+    <label class="block mb-3">
+      <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-600" data-i18n="cart.nameLabel"></span>
+      <input
+        id="customer-name"
+        type="text"
+        autocomplete="name"
+        maxlength="40"
+        class="mt-1 block w-full border-2 border-black bg-white px-3 py-3 text-base font-display tracking-wider uppercase placeholder:text-neutral-400 placeholder:normal-case placeholder:font-sans placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+      />
+    </label>
+
+    <div class="flex items-baseline justify-between">
+      <span class="font-mono text-xs uppercase tracking-widest text-neutral-600" data-i18n="cart.subtotal"></span>
+      <span id="cart-subtotal" class="font-display text-xl md:text-2xl">$0.00</span>
+    </div>
+    <div class="mt-1 flex items-baseline justify-between">
+      <span class="font-mono text-xs uppercase tracking-widest text-neutral-600" data-i18n="cart.tax"></span>
+      <span id="cart-tax" class="font-mono text-sm">$0.00</span>
+    </div>
+    <div class="mt-2 flex items-baseline justify-between border-t-2 border-black pt-2 md:mt-3 md:pt-3">
+      <span class="font-display text-lg md:text-xl" data-i18n="cart.total"></span>
+      <span id="cart-total" class="font-display text-3xl md:text-4xl">$0.00</span>
+    </div>
+    <button id="checkout-btn" class="mt-3 w-full border-2 border-black bg-black px-5 py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary tap md:mt-4" data-i18n="cart.checkout"></button>
+    <p class="mt-2 text-center text-[10px] font-mono uppercase tracking-widest text-neutral-500" data-i18n="cart.pickup"></p>
+  </div>
+</aside>
+
+<!-- ===== ITEM MODAL (bottom sheet mobile, centered desktop) ===== -->
+<div id="item-modal-scrim" class="scrim pointer-events-none fixed inset-0 z-50 bg-black/50 opacity-0"></div>
+<div id="item-modal" class="sheet fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col overflow-hidden border-t-2 border-black bg-[var(--paper)] md:inset-auto md:left-auto md:right-0 md:top-0 md:bottom-0 md:max-h-none md:h-full md:w-[26rem] md:max-w-md md:border-t-0 md:border-l-2 md:border-y-0 md:border-r-0">
+  <div class="drag-handle md:hidden"></div>
+  <div class="flex items-center justify-between border-b-2 border-black px-4 py-3 md:px-5 md:py-4">
+    <div class="flex items-center gap-3">
+      <div id="modal-icon" class="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-black bg-white"></div>
+      <div>
+        <div id="modal-name" class="font-display text-xl leading-tight md:text-2xl"></div>
+        <div id="modal-meta" class="font-mono text-[10px] uppercase tracking-widest text-neutral-500"></div>
+      </div>
+    </div>
+    <button id="close-modal" class="border-2 border-black bg-white tap-sm px-3 text-xs font-bold btn-primary">✕</button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-4 md:p-5">
+    <!-- Quantity -->
+    <div>
+      <div class="flex items-baseline justify-between">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="modal.qty"></div>
+        <div id="modal-qty-price" class="font-mono text-xs text-neutral-600"></div>
+      </div>
+      <div class="mt-2 flex items-stretch border-2 border-black">
+        <button data-qty="-1" class="qty-btn flex-1 border-r-2 border-black bg-white py-4 font-display text-3xl btn-primary">−</button>
+        <div class="flex flex-1 items-center justify-center bg-white">
+          <span id="modal-qty" class="font-display text-3xl">1</span>
+          <span id="modal-qty-unit" class="ml-1 font-mono text-xs uppercase text-neutral-600"></span>
+        </div>
+        <button data-qty="1" class="qty-btn flex-1 border-l-2 border-black bg-white py-4 font-display text-3xl btn-primary">+</button>
+      </div>
+    </div>
+
+    <!-- Doneness -->
+    <div id="modal-doneness-block" class="mt-5">
+      <div class="flex items-baseline justify-between">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="modal.term"></div>
+        <div id="modal-doneness-name" class="font-mono text-xs text-neutral-700">—</div>
+      </div>
+      <div id="doneness-strip" class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6"></div>
+      <div id="doneness-detail" class="mt-3 border-2 border-black bg-white p-3 text-xs text-neutral-700"></div>
+    </div>
+
+    <!-- Add-ons -->
+    <div id="modal-addons-block" class="mt-5">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="modal.addons"></div>
+      <div id="addons-grid" class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="mt-5 mb-2">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="modal.notes"></div>
+      <div id="notes-grid" class="mt-2 flex flex-wrap gap-2"></div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between gap-3 border-t-2 border-black bg-white p-3 md:p-4" style="padding-bottom: calc(.75rem + var(--safe-bottom))">
+    <div class="shrink-0">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="modal.totalLine"></div>
+      <div id="modal-total" class="font-display text-2xl md:text-3xl">$0.00</div>
+    </div>
+    <button id="add-to-cart" class="flex-1 border-2 border-black bg-black px-4 py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary tap" data-i18n="modal.add"></button>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT SUCCESS ===== -->
+<div id="success-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 p-4">
+  <div class="pop-in w-full max-w-md border-2 border-black bg-[var(--paper)]">
+    <div class="border-b-2 border-black p-5 text-center">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center border-2 border-black bg-white">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 12l5 5L20 6"/>
+        </svg>
+      </div>
+      <div class="mt-4 font-display text-3xl md:text-4xl" data-i18n="success.title"></div>
+      <p class="mt-2 text-sm text-neutral-700"><span data-i18n="success.desc.1"></span> <span id="order-id" class="font-mono"></span> <span data-i18n="success.desc.2"></span></p>
+    </div>
+    <div class="p-5">
+      <button id="close-success" class="w-full border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white btn-primary tap" data-i18n="success.cta"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOASTS ===== -->
+<div id="toast-stack" class="pointer-events-none fixed left-3 right-3 z-[70] flex flex-col gap-2" style="top: calc(var(--header-h) + var(--tabs-h) + 8px)"></div>
+
+<!-- ===== APP ===== -->
+<script>
+//
+// ============== I18N ==============
+//
+const I18N = {
+  es: {
+    'nav.special':'Especial', 'nav.packages':'Paquetes', 'nav.grill':'Parrilla',
+    'nav.sauces':'Salsas', 'nav.drinks':'Bebidas',
+    'nav.cart':'Carrito',
+
+    'hero.tagline':'Hecho a la brasa · Listo para llevar',
+    'hero.title':'FAJITA.<br/>A LA BRASA.<br/><span class="italic font-serif font-normal">para llevar.</span>',
+    'hero.desc':'Escoge tu paquete, dinos el término y suma sides y bebidas. Todo con clics.',
+    'hero.startOrder':'Empezar pedido →',
+    'hero.seeSpecial':'Ver especial',
+    'hero.stat.packages':'Paquetes',
+    'hero.stat.doneness':'Términos',
+    'hero.stat.drinks':'Bebidas',
+
+    'how.01':'Escoge', 'how.01d':'Tap para 2, 4 ó 5.',
+    'how.02':'Término', 'how.02d':'Pantonera del azul al bien.',
+    'how.03':'Sides', 'how.03d':'Tortillas, salsas, papa, arroz.',
+    'how.04':'Confirma', 'how.04d':'Un clic y sale a la parrilla.',
+
+    'special.badge':'Mié · Jue',
+    'special.tagline':'Especial de mitad de semana',
+    'special.title':'WED &<br/>THU<br/>SPECIAL',
+    'special.desc':'<span class="font-bold">2 lbs de fajita</span> a la brasa + <span class="font-bold">1 lb de salchicha</span> ahumada.',
+    'special.priceLabel':'Precio especial',
+    'special.cta':'Agregar →',
+    'special.includes':'Incluye',
+    'special.fajita.title':'FAJITA · 2 LBS',
+    'special.fajita.desc':'Asada al carbón',
+    'special.sausage.title':'SALCHICHA · 1 LB',
+    'special.sausage.desc':'Smoked sausage de la casa',
+    'special.term.title':'TÉRMINO A ELEGIR',
+    'special.term.desc':'Del azul al bien cocido',
+
+    'sec.packages':'PAQUETES',
+    'sec.packages.label':'Sección 01',
+    'sec.priceUsd':'Precios en USD',
+    'filter.all':'Todo', 'filter.chicken':'Pollo', 'filter.beef':'Res', 'filter.mix':'Mixto',
+    'sec.grill':'SIDES · DE LA PARRILLA',
+    'sec.grill.label':'Sección 02',
+    'sec.grill.desc':'Acompañamientos recién hechos. Toca para sumar.',
+    'sec.sauces':'SALSAS Y MÁS',
+    'sec.sauces.label':'Sección 03',
+    'sec.sauces.desc':'Tortillas, salsas, guacamole.',
+    'sec.drinks':'BEBIDAS',
+    'sec.drinks.label':'Sección 04',
+    'sec.drinks.desc':'Sodas mexicanas, refrescos y multi-packs.',
+    'drinks.individual':'Individuales',
+    'drinks.large':'Botellas grandes · 2L y 2.5L',
+    'drinks.packs':'12-Packs',
+
+    'foot.hours':'Lun a Dom · 11am — 9pm',
+
+    'cart.title':'CARRITO', 'cart.subtitle':'Tu pedido', 'cart.close':'Cerrar ✕',
+    'cart.viewOrder':'Ver pedido',
+    'cart.empty.title':'Vacío', 'cart.empty.sub':'Empieza tocando un paquete.',
+    'cart.subtotal':'Subtotal', 'cart.tax':'Tax (8.25%)', 'cart.total':'TOTAL',
+    'cart.checkout':'Confirmar pedido →', 'cart.pickup':'Pickup · Pago al recoger',
+    'cart.nameLabel':'Tu nombre', 'cart.namePlaceholder':'Para llamarte cuando esté listo',
+    'cart.nameRequired':'Escribe tu nombre',
+    'sold.out':'Agotado',
+    'cart.bar.empty':'Sin items',
+    'cart.bar.items':'item', 'cart.bar.items_plural':'items',
+
+    'modal.qty':'Cantidad',
+    'modal.term':'Término · Pantonera',
+    'modal.term.hint':'Toca un swatch para ver descripción.',
+    'modal.addons':'Súmale al paquete',
+    'modal.notes':'Notas rápidas · opcional',
+    'modal.totalLine':'Total',
+    'modal.add':'Agregar',
+    'modal.cookingTime':'cocción',
+
+    'success.title':'¡A LA PARRILLA!',
+    'success.desc.1':'Tu pedido',
+    'success.desc.2':'está en preparación. Pickup en ~25 min.',
+    'success.cta':'Hacer otro pedido',
+
+    'pkg.for':'Para', 'pkg.share':'Compartir',
+    'pkg.chooseTerm':'Elige término', 'pkg.ready':'Listo',
+    'pkg.sizes':'tamaños', 'pkg.chooseSize':'Elige tamaño',
+    'pkg.add':'+', 'simple.tap':'+',
+    'qty.unit':'paq',
+
+    'toast.added':'agregado',
+    'toast.removed':'Quitado del carrito',
+    'toast.welcome':'Bienvenido a la parrilla 🔥',
+    'toast.chooseTerm':'Elige un término primero',
+    'toast.readyAgain':'Listo para otro pedido',
+
+    'notes.0':'Sin sal', 'notes.1':'Extra término', 'notes.2':'Cortar en tiras',
+    'notes.3':'Sin grasa', 'notes.4':'Bien sellado', 'notes.5':'Servir aparte',
+
+    'don.azul':'Azul',          'don.azul.sub':'Sellado afuera, crudo adentro',
+    'don.rojo':'Rojo',          'don.rojo.sub':'Centro frío y rojo',
+    'don.medio':'Medio rojo',   'don.medio.sub':'Centro tibio y rojo',
+    'don.tres':'Tres cuartos',  'don.tres.sub':'Centro rosado',
+    'don.cuatro':'Punto',       'don.cuatro.sub':'Apenas rosado',
+    'don.bien':'Bien cocido',   'don.bien.sub':'Cocido por completo',
+
+    'cart.label.parrilla':'parrilla', 'cart.label.salsa':'salsa',
+    'cart.label.bebida':'bebida',     'cart.label.extra':'extra',
+
+    'cat.pollo':'pollo', 'cat.res':'res', 'cat.mixto':'mixto',
+
+    'addons.ct':'Tortillas Maíz',
+    'addons.ft':'Tortillas Harina',
+    'addons.cb':'Frijoles Charros',
+    'addons.sr':'Salsa Roja',
+    'addons.av':'Salsa Aguacate',
+    'addons.gua':'Guacamole',
+
+    'sub.jalapenos':'Jalapeños rellenos',
+  },
+  en: {
+    'nav.special':'Special', 'nav.packages':'Packages', 'nav.grill':'Grill',
+    'nav.sauces':'Sauces', 'nav.drinks':'Drinks',
+    'nav.cart':'Cart',
+
+    'hero.tagline':'Charcoal-grilled · Ready to take',
+    'hero.title':'FAJITA.<br/>GRILLED.<br/><span class="italic font-serif font-normal">to go.</span>',
+    'hero.desc':'Pick a package, tap your doneness, add sides and drinks. All with clicks.',
+    'hero.startOrder':'Start order →',
+    'hero.seeSpecial':'See special',
+    'hero.stat.packages':'Packages',
+    'hero.stat.doneness':'Doneness',
+    'hero.stat.drinks':'Drinks',
+
+    'how.01':'Pick', 'how.01d':'Tap for 2, 4 or 5.',
+    'how.02':'Doneness', 'how.02d':'Blue to well-done.',
+    'how.03':'Sides', 'how.03d':'Tortillas, salsas, potato, rice.',
+    'how.04':'Confirm', 'how.04d':'One click, hits the grill.',
+
+    'special.badge':'Wed · Thu',
+    'special.tagline':'Mid-week special',
+    'special.title':'WED &<br/>THU<br/>SPECIAL',
+    'special.desc':'<span class="font-bold">2 lbs of grilled fajita</span> + <span class="font-bold">1 lb of smoked sausage</span>.',
+    'special.priceLabel':'Special price',
+    'special.cta':'Add →',
+    'special.includes':'Includes',
+    'special.fajita.title':'FAJITA · 2 LBS',
+    'special.fajita.desc':'Charcoal-grilled',
+    'special.sausage.title':'SAUSAGE · 1 LB',
+    'special.sausage.desc':'House smoked sausage',
+    'special.term.title':'CHOOSE DONENESS',
+    'special.term.desc':'From blue to well-done',
+
+    'sec.packages':'PACKAGES',
+    'sec.packages.label':'Section 01',
+    'sec.priceUsd':'Prices in USD',
+    'filter.all':'All', 'filter.chicken':'Chicken', 'filter.beef':'Beef', 'filter.mix':'Mix',
+    'sec.grill':'SIDES · FROM THE GRILL',
+    'sec.grill.label':'Section 02',
+    'sec.grill.desc':'Fresh sides. Tap to add.',
+    'sec.sauces':'SAUCES & MORE',
+    'sec.sauces.label':'Section 03',
+    'sec.sauces.desc':'Tortillas, salsas, guacamole.',
+    'sec.drinks':'DRINKS',
+    'sec.drinks.label':'Section 04',
+    'sec.drinks.desc':'Mexican sodas, soft drinks and multi-packs.',
+    'drinks.individual':'Singles',
+    'drinks.large':'Large bottles · 2L & 2.5L',
+    'drinks.packs':'12-Packs',
+
+    'foot.hours':'Mon to Sun · 11am — 9pm',
+
+    'cart.title':'CART', 'cart.subtitle':'Your order', 'cart.close':'Close ✕',
+    'cart.viewOrder':'View order',
+    'cart.empty.title':'Empty', 'cart.empty.sub':'Tap a package to start.',
+    'cart.subtotal':'Subtotal', 'cart.tax':'Tax (8.25%)', 'cart.total':'TOTAL',
+    'cart.checkout':'Confirm order →', 'cart.pickup':'Pickup · Pay on pickup',
+    'cart.nameLabel':'Your name', 'cart.namePlaceholder':'So we can call you when it\'s ready',
+    'cart.nameRequired':'Enter your name',
+    'sold.out':'Sold out',
+    'cart.bar.empty':'No items',
+    'cart.bar.items':'item', 'cart.bar.items_plural':'items',
+
+    'modal.qty':'Quantity',
+    'modal.term':'Doneness · Pantone',
+    'modal.term.hint':'Tap a swatch to see details.',
+    'modal.addons':'Add to package',
+    'modal.notes':'Quick notes · optional',
+    'modal.totalLine':'Total',
+    'modal.add':'Add',
+    'modal.cookingTime':'cook',
+
+    'success.title':'TO THE GRILL!',
+    'success.desc.1':'Your order',
+    'success.desc.2':'is being prepared. Pickup in ~25 min.',
+    'success.cta':'Place another order',
+
+    'pkg.for':'For', 'pkg.share':'Share',
+    'pkg.chooseTerm':'Choose doneness', 'pkg.ready':'Ready',
+    'pkg.sizes':'sizes', 'pkg.chooseSize':'Choose size',
+    'pkg.add':'+', 'simple.tap':'+',
+    'qty.unit':'pkg',
+
+    'toast.added':'added',
+    'toast.removed':'Removed from cart',
+    'toast.welcome':'Welcome to the grill 🔥',
+    'toast.chooseTerm':'Choose a doneness first',
+    'toast.readyAgain':'Ready for another order',
+
+    'notes.0':'No salt', 'notes.1':'Extra cooked', 'notes.2':'Sliced',
+    'notes.3':'No fat', 'notes.4':'Well seared', 'notes.5':'On the side',
+
+    'don.azul':'Blue',         'don.azul.sub':'Seared outside, raw inside',
+    'don.rojo':'Rare',         'don.rojo.sub':'Cool red center',
+    'don.medio':'Medium rare', 'don.medio.sub':'Warm red center',
+    'don.tres':'Medium',       'don.tres.sub':'Pink center',
+    'don.cuatro':'Medium well','don.cuatro.sub':'Slightly pink',
+    'don.bien':'Well done',    'don.bien.sub':'Fully cooked',
+
+    'cart.label.parrilla':'grill', 'cart.label.salsa':'sauce',
+    'cart.label.bebida':'drink',   'cart.label.extra':'extra',
+
+    'cat.pollo':'chicken', 'cat.res':'beef', 'cat.mixto':'mix',
+
+    'addons.ct':'Corn Tortillas',
+    'addons.ft':'Flour Tortillas',
+    'addons.cb':'Charro Beans',
+    'addons.sr':'Salsa Roja',
+    'addons.av':'Avocado Salsa',
+    'addons.gua':'Guacamole',
+
+    'sub.jalapenos':'Stuffed Jalapeños',
+  },
+};
+
+const t = (key) => I18N[state.lang][key] ?? key;
+
+//
+// ============== DATA ==============
+//
+const DONENESS = [
+  { id:'azul',   color:'#5b1212', tempo:'2 min',  center:'#3a0a0a' },
+  { id:'rojo',   color:'#7a1a1a', tempo:'4 min',  center:'#5b1010' },
+  { id:'medio',  color:'#a23030', tempo:'6 min',  center:'#7a1a1a' },
+  { id:'tres',   color:'#b9614a', tempo:'8 min',  center:'#a23030' },
+  { id:'cuatro', color:'#9c6242', tempo:'10 min', center:'#7a4a2a' },
+  { id:'bien',   color:'#5e3a23', tempo:'12 min', center:'#3d2613' },
+];
+
+const NOTE_KEYS = ['notes.0','notes.1','notes.2','notes.3','notes.4','notes.5'];
+
+const ADDONS = [
+  { id:'ct-add', i18n:'addons.ct',  unit:'10 pcs', price:2.08, dot:'#e8c890', icon:'side-tortilla'  },
+  { id:'ft-add', i18n:'addons.ft',  unit:'20 pcs', price:7.27, dot:'#fafaf7', icon:'tortilla-flour' },
+  { id:'cb-add', i18n:'addons.cb',  unit:'8oz',    price:2.60, dot:'#5a3210', icon:'side-frijol'    },
+  { id:'sr-add', i18n:'addons.sr',  unit:'8oz',    price:4.68, dot:'#8a1a1a', icon:'salsa-bottle'         },
+  { id:'av-add', i18n:'addons.av',  unit:'8oz',    price:4.68, dot:'#7a9a3a', icon:'salsa-bottle-avocado' },
+  { id:'gua-add',i18n:'addons.gua', unit:'16oz',   price:9.35, dot:'#3a8a3a', icon:'side-guaca'     },
+];
+
+const SPECIAL = {
+  id:'special', cat:'special', name:'Wed & Thu Special',
+  price:38.84, icon:'special-plate', requiresDoneness:true,
+};
+
+const PACKAGES = [
+  { id:'cf2',  name:'Chicken Fajita',     serves:2, price:10.39, icon:'pollo',     cat:'pollo', requiresDoneness:false },
+  { id:'cf4',  name:'Chicken Fajita',     serves:4, price:19.75, icon:'pollo',     cat:'pollo', requiresDoneness:false },
+  { id:'bf2',  name:'Beef Fajita',        serves:2, price:28.07, icon:'arrachera', cat:'res',   requiresDoneness:true  },
+  { id:'bf4',  name:'Beef Fajita',        serves:4, price:40.93, icon:'arrachera', cat:'res',   requiresDoneness:true  },
+  { id:'mg5',  name:'Mixto Ganadera',     serves:5, price:40.93, icon:'mixto',     cat:'mixto', requiresDoneness:true  },
+  { id:'mm5',  name:'Mixto Meat',         serves:5, price:51.99, icon:'mixto',     cat:'mixto', requiresDoneness:true  },
+  { id:'co2',  name:'Costillitas',        serves:2, price:20.79, icon:'costilla',  cat:'res',   requiresDoneness:true  },
+  { id:'co4',  name:'Costillitas',        serves:4, price:32.23, icon:'costilla',  cat:'res',   requiresDoneness:true  },
+  { id:'mn',   name:'Mixto Norteño',      serves:0, price:36.39, icon:'mixto',     cat:'mixto', requiresDoneness:true  },
+  { id:'an2',  name:'Aguja Norteña',      serves:2, price:19.93, icon:'newyork',   cat:'res',   requiresDoneness:true  },
+  { id:'an4',  name:'Aguja Norteña',      serves:4, price:30.44, icon:'newyork',   cat:'res',   requiresDoneness:true  },
+  { id:'sr2',  name:'Sirloin',            serves:2, price:20.99, icon:'ribeye',    cat:'res',   requiresDoneness:true  },
+  { id:'sr4',  name:'Sirloin',            serves:4, price:32.54, icon:'ribeye',    cat:'res',   requiresDoneness:true  },
+  { id:'ll2',  name:'Laminita de León',   serves:2, price:29.11, icon:'tbone',     cat:'res',   requiresDoneness:true  },
+  { id:'ll4',  name:'Laminita de León',   serves:4, price:48.87, icon:'tbone',     cat:'res',   requiresDoneness:true  },
+];
+
+const GRILL_SIDES = [
+  { id:'rat',  name:'Ratones',                    i18nSub:'sub.jalapenos', price:3.11,  icon:'chili' },
+  { id:'ss',   name:'Smoked Sausage',             sub:'1 lb',              price:8.31,  icon:'chorizo' },
+  { id:'ssc',  name:'Cheddar Smoked Sausage',     sub:'1 lb',              price:8.31,  icon:'chorizo-cheddar' },
+  { id:'ssjc', name:'Jalapeño & Cheddar Sausage', sub:'1 lb',              price:8.31,  icon:'chorizo-jalapeno' },
+  { id:'on',   name:'Grilled Onion',              sub:'',                  price:1.56,  icon:'onion' },
+  { id:'gch',  name:'Ganadera Chips',             sub:'11 oz',             price:4.15,  icon:'chips' },
+  { id:'cb',   name:'Charro Beans',               sub:'8 oz',              price:2.60,  icon:'side-frijol' },
+  { id:'chsv', name:'Chicharrón Salsa Verde',     sub:'16 oz',             price:12.47, icon:'chicharron' },
+  { id:'pa',   name:'Papa Asada',                 sub:'',                  price:10.39, icon:'side-papa' },
+  { id:'fp',   name:'Fajipapa',                   sub:'',                  price:15.59, icon:'fajipapa' },
+  { id:'ar8',  name:'Arroz Caliente',             sub:'8 oz',              price:4.15,  icon:'rice' },
+  { id:'ar16', name:'Arroz Caliente',             sub:'16 oz',             price:6.23,  icon:'rice' },
+  { id:'ar32', name:'Arroz Caliente',             sub:'32 oz',             price:8.31,  icon:'rice' },
+];
+
+const SAUCES_PAGE = [
+  { id:'ct',   name:'Corn Tortillas',       sub:'10 pcs', price:2.08, icon:'side-tortilla',  dot:'#e8c890' },
+  { id:'ft',   name:'Flour Tortillas',      sub:'20 pcs', price:7.27, icon:'tortilla-flour', dot:'#f4ecdc' },
+  { id:'av',   name:'Avocado Salsa',        sub:'8 oz',   price:4.68, icon:'salsa-bottle-avocado',   dot:'#7a9a3a' },
+  { id:'srl',  name:'Salsa Roja',           sub:'8 oz',   price:4.68, icon:'salsa-bottle',            dot:'#8a1a1a' },
+  { id:'pg',   name:'Pico de Gallo',        sub:'16 oz',  price:6.23, icon:'pico',                    dot:'#c43a2a' },
+  { id:'gua',  name:'Guacamole',            sub:'16 oz',  price:9.35, icon:'side-guaca',              dot:'#3a8a3a' },
+  { id:'sn',   name:'Salsa Naranja',        sub:'8 oz',   price:4.68, icon:'salsa-bottle-naranja',    dot:'#c25a1a' },
+  { id:'svt',  name:'Salsa Verde Tatemada', sub:'8 oz',   price:4.68, icon:'salsa-bottle-tatemada',   dot:'#3a5a2a' },
+  { id:'svc',  name:'Salsa Verde Clara',    sub:'8 oz',   price:4.68, icon:'salsa-bottle-clara',      dot:'#7a9a3a' },
+];
+
+const DRINKS_INDIVIDUAL = [
+  { id:'ccm',  name:'Coca Cola Mexicana', sub:'Glass', price:3.12, icon:'soda-bottle', dot:'#7a3a1a' },
+  { id:'sp20', name:'Sprite',             sub:'20 oz', price:3.12, icon:'soda-bottle', dot:'#3a8a3a' },
+  { id:'cc20', name:'Coca Cola',          sub:'20 oz', price:3.12, icon:'soda-bottle', dot:'#c43a2a' },
+  { id:'dp20', name:'Dr Pepper',          sub:'20 oz', price:3.12, icon:'soda-bottle', dot:'#5a1a1a' },
+  { id:'cz20', name:'Coca Cola Zero',     sub:'20 oz', price:3.12, icon:'soda-bottle', dot:'#1a1a1a' },
+  { id:'cd20', name:'Coke Diet',          sub:'20 oz', price:3.12, icon:'soda-bottle', dot:'#9a9a9a' },
+  { id:'jfp',  name:'Joya Fruit Punch',   sub:'',      price:3.12, icon:'soda-can',    dot:'#c43a2a' },
+  { id:'jdz',  name:'Joya Durazno',       sub:'',      price:3.12, icon:'soda-can',    dot:'#e8a040' },
+  { id:'jmz',  name:'Joya Manzanita',     sub:'',      price:3.12, icon:'soda-can',    dot:'#3a8a3a' },
+];
+
+const DRINKS_LARGE = [
+  { id:'ms2',  name:'Manzanita Sol',  sub:'2 L',   price:5.20, icon:'soda-2l', dot:'#3a8a3a' },
+  { id:'cz2',  name:'Coca Cola Zero', sub:'2 L',   price:5.20, icon:'soda-2l', dot:'#1a1a1a' },
+  { id:'dp2',  name:'Dr Pepper',      sub:'2 L',   price:5.20, icon:'soda-2l', dot:'#5a1a1a' },
+  { id:'cc25', name:'Coca Cola',      sub:'2.5 L', price:6.24, icon:'soda-2l', dot:'#c43a2a' },
+  { id:'jp25', name:'Joya Ponche',    sub:'2.5 L', price:6.24, icon:'soda-2l', dot:'#a8302a' },
+  { id:'fr25', name:'Fresca',         sub:'2.5 L', price:6.24, icon:'soda-2l', dot:'#a8c890' },
+  { id:'jm25', name:'Joya Manzana',   sub:'2.5 L', price:6.24, icon:'soda-2l', dot:'#3a8a3a' },
+];
+
+const DRINKS_PACKS = [
+  { id:'pcdc', name:'Diet Coke',  sub:'12-pack', price:12.48, icon:'soda-pack', dot:'#9a9a9a' },
+  { id:'pcsp', name:'Sprite',     sub:'12-pack', price:12.48, icon:'soda-pack', dot:'#3a8a3a' },
+  { id:'pccc', name:'Coca Cola',  sub:'12-pack', price:12.48, icon:'soda-pack', dot:'#c43a2a' },
+];
+
+//
+// ============== SVG ICONS ==============
+//
+function svgIcon(kind, size = 56) {
+  const num = ICON_MAP[kind];
+  if (!num) {
+    return `<div style="width:${size}px;height:${size}px;background:#0a0a0a;"></div>`;
+  }
+  return `<img src="/icons/${num}.png" width="${size}" height="${size}" alt="" loading="lazy" style="display:block;object-fit:contain;" />`;
+}
+
+const ICON_MAP = {
+  'special-plate':         '001',
+  'pollo':                 '002',
+  'arrachera':             '003',
+  'mixto':                 '004',
+  'costilla':              '005',
+  'newyork':               '006',
+  'ribeye':                '007',
+  'tbone':                 '008',
+  'chorizo':               '009',
+  'chorizo-cheddar':       '010',
+  'chorizo-jalapeno':      '011',
+  'chili':                 '012',
+  'onion':                 '013',
+  'chips':                 '014',
+  'side-frijol':           '015',
+  'chicharron':            '016',
+  'side-papa':             '017',
+  'fajipapa':              '018',
+  'rice':                  '019',
+  'side-tortilla':         '020',
+  'tortilla-flour':        '021',
+  'salsa-bottle':          '022',
+  'salsa-bottle-avocado':  '023',
+  'salsa-bottle-naranja':  '024',
+  'salsa-bottle-tatemada': '025',
+  'salsa-bottle-clara':    '026',
+  'pico':                  '027',
+  'side-guaca':            '028',
+  'soda-can':              '029',
+  'soda-bottle':           '030',
+  'soda-2l':               '031',
+  'soda-pack':             '032',
+};
+
+//
+// ============== STATE ==============
+//
+const state = {
+  cart: JSON.parse(localStorage.getItem('cart') || '[]'),
+  filter: 'all',
+  modal: null,
+  lang: localStorage.getItem('lang') || 'es',
+};
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function persist() { localStorage.setItem('cart', JSON.stringify(state.cart)); }
+
+//
+// ============== I18N APPLY ==============
+//
+function applyI18n() {
+  document.documentElement.lang = state.lang;
+  $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $$('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  const u = $('#modal-qty-unit'); if (u) u.textContent = t('qty.unit');
+  const ni = $('#customer-name'); if (ni) ni.placeholder = t('cart.namePlaceholder');
+  $$('.lang-btn').forEach(b => b.classList.toggle('is-active', b.dataset.lang === state.lang));
+}
+
+function setLang(lang) {
+  if (state.lang === lang) return;
+  state.lang = lang;
+  localStorage.setItem('lang', lang);
+  applyI18n();
+  renderPackages();
+  renderGrill();
+  renderSaucesPage();
+  renderDrinks();
+  renderCart();
+  if (state.modal) {
+    const pkg = state.modal.pkg;
+    $('#modal-name').textContent = pkg.name.toUpperCase();
+    $('#modal-meta').textContent = pkg.serves
+      ? `${t('pkg.for')} ${pkg.serves} · ${fmt(pkg.price)}`
+      : `${fmt(pkg.price)} · ${t('qty.unit')}`;
+    if (pkg.requiresDoneness) renderDonenessStrip(state.modal.doneness);
+    renderAddons(state.modal.addons);
+    renderNotesGrid(state.modal.notes);
+  }
+}
+
+//
+// ============== TOAST ==============
+//
+function toast(msg, opts = {}) {
+  const { tone = 'default', duration = 2000 } = opts;
+  const el = document.createElement('div');
+  const tones = {
+    default: 'bg-white text-black border-black',
+    success: 'bg-black text-white border-black',
+    warn:    'bg-amber-50 text-black border-black',
+  };
+  el.className = `toast pointer-events-auto flex items-center gap-3 border-2 ${tones[tone]} px-4 py-3 shadow-[4px_4px_0_0_#0a0a0a] mx-auto max-w-md w-full`;
+  el.innerHTML = `
+    <span class="font-mono text-[10px] uppercase tracking-widest opacity-60">${tone === 'success' ? 'OK' : 'i'}</span>
+    <span class="text-sm font-medium flex-1">${msg}</span>
+  `;
+  $('#toast-stack').appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }, duration);
+}
+
+//
+// ============== RENDER · PACKAGES (compact mobile cards) ==============
+//
+function packageCardGroup(group) {
+  const first = group[0]; // icon, name, cat, requiresDoneness all match within a group
+  const hasMultiple = group.length > 1;
+  const allSold = group.every(p => isSoldOut(p.id));
+
+  const sizeButtons = group.map(p => {
+    const sizeLabel = p.serves ? `${t('pkg.for')} ${p.serves}` : t('pkg.share');
+    const sold = isSoldOut(p.id);
+    return `
+      <button data-pkg="${p.id}" ${sold ? 'disabled' : ''} class="pkg-btn group/btn flex flex-col items-center justify-center gap-0.5 border-2 border-black ${sold ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed line-through opacity-70' : 'bg-[var(--paper)] hover:bg-black hover:text-white active:scale-[0.98]'} px-3 py-2.5 text-center transition">
+        <div class="font-mono text-[10px] uppercase tracking-widest opacity-70">${sizeLabel}${sold ? ' · ' + t('sold.out').toUpperCase() : ''}</div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-display text-2xl leading-none">${fmt(p.price)}</span>
+          <span class="font-display text-xl leading-none opacity-60">${sold ? '✕' : '+'}</span>
+        </div>
+      </button>
+    `;
+  }).join('');
+
+  // Header badge: count of sizes when there are multiple
+  const cornerBadge = hasMultiple
+    ? `<span class="border border-black bg-amber-300 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-black">${group.length} ${t('pkg.sizes')}</span>`
+    : '';
+
+  // Inline hint above the buttons when there are multiple
+  const sizesHint = hasMultiple
+    ? `<div class="mb-2 flex items-center justify-between font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-700">
+         <span>${t('pkg.chooseSize')}</span>
+         <span>↓</span>
+       </div>`
+    : '';
+
+  return `
+    <div class="card-hover flex flex-col border-2 border-black bg-white p-3 md:p-5">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex h-12 w-12 items-center justify-center border-2 border-black bg-[var(--paper)] md:h-16 md:w-16">
+          ${svgIcon(first.icon, 36)}
+        </div>
+        ${cornerBadge}
+      </div>
+      <div class="mt-2 md:mt-4">
+        <h3 class="font-display text-xl leading-tight tracking-tight md:text-3xl">${first.name.toUpperCase()}</h3>
+        <div class="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-neutral-500 md:text-[10px]">${t('cat.' + first.cat)}${first.requiresDoneness ? ' · ' + t('pkg.chooseTerm') : ''}</div>
+      </div>
+      <div class="mt-auto pt-3 border-t-2 border-black md:pt-4">
+        ${sizesHint}
+        <div class="grid gap-2">
+          ${sizeButtons}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPackages() {
+  const grid = $('#packages-grid');
+  const items = state.filter === 'all' ? PACKAGES : PACKAGES.filter(p => p.cat === state.filter);
+  // Group by name (Chicken Fajita ×2, Beef Fajita ×2, Costillitas ×2, etc.)
+  const groups = [];
+  const groupIndex = new Map();
+  items.forEach(p => {
+    if (groupIndex.has(p.name)) {
+      groups[groupIndex.get(p.name)].push(p);
+    } else {
+      groupIndex.set(p.name, groups.length);
+      groups.push([p]);
+    }
+  });
+  grid.innerHTML = groups.map(packageCardGroup).join('');
+  $$('.pkg-btn').forEach(btn => btn.addEventListener('click', () => openPackageModal(btn.dataset.pkg)));
+}
+
+//
+// ============== RENDER · GRILL / SAUCES / DRINKS (compact tap-cards) ==============
+//
+function groupByName(items) {
+  const groups = [];
+  const idx = new Map();
+  items.forEach(p => {
+    if (idx.has(p.name)) {
+      groups[idx.get(p.name)].push(p);
+    } else {
+      idx.set(p.name, groups.length);
+      groups.push([p]);
+    }
+  });
+  return groups;
+}
+
+function simpleCard(item, dark = false) {
+  const skin = dark
+    ? 'border-white bg-neutral-950 text-white'
+    : 'border-black bg-white text-black';
+  const subtone = dark ? 'text-neutral-400' : 'text-neutral-500';
+  const dotEl = item.dot
+    ? `<span class="ml-1 inline-block h-2.5 w-2.5 rounded-full shrink-0" style="background:${item.dot}"></span>`
+    : '';
+  const subText = item.i18nSub ? t(item.i18nSub) : item.sub;
+  const sold = isSoldOut(item.id);
+  const soldOverlay = sold
+    ? `<div class="absolute inset-0 z-10 flex items-center justify-center bg-black/70 pointer-events-none"><span class="border-2 border-white bg-black px-3 py-1 font-display text-lg uppercase tracking-widest text-white">${t('sold.out')}</span></div>`
+    : '';
+  return `
+    <button data-add="${item.id}" ${sold ? 'disabled' : ''} class="add-simple relative ${sold ? 'opacity-60 cursor-not-allowed' : 'card-hover card-press'} flex flex-col items-stretch border-2 ${skin} p-3 text-left">
+      ${soldOverlay}
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex h-12 w-12 items-center justify-center border-2 ${dark ? 'border-white' : 'border-black'} bg-[var(--paper)] overflow-hidden">${svgIcon(item.icon, 44)}</div>
+        ${subText ? `<span class="font-mono text-[9px] uppercase tracking-widest ${subtone} md:text-[10px]">${subText}</span>` : ''}
+      </div>
+      <div class="mt-2 flex items-baseline gap-1">
+        <div class="text-xs font-bold leading-tight md:text-sm">${item.name}</div>${dotEl}
+      </div>
+      <div class="mt-2 flex w-full items-center justify-between gap-1">
+        <span class="font-display text-lg md:text-xl">${fmt(item.price)}</span>
+        <span class="add-pill flex h-11 w-11 items-center justify-center border-2 ${dark ? 'border-white bg-white text-black' : 'border-black bg-[var(--paper)]'} font-display text-2xl leading-none">${t('simple.tap')}</span>
+      </div>
+    </button>
+  `;
+}
+
+function simpleCardGroup(group, dark = false) {
+  const first = group[0];
+  const skin = dark
+    ? 'border-white bg-neutral-950 text-white'
+    : 'border-black bg-white text-black';
+  const subtone = dark ? 'text-neutral-400' : 'text-neutral-500';
+  const dotEl = first.dot
+    ? `<span class="ml-1 inline-block h-2.5 w-2.5 rounded-full shrink-0" style="background:${first.dot}"></span>`
+    : '';
+
+  const sizeButtons = group.map(item => {
+    const sizeText = item.i18nSub ? t(item.i18nSub) : (item.sub || '—');
+    const sold = isSoldOut(item.id);
+    const enabledClass = dark
+      ? 'border-white bg-neutral-900 text-white hover:bg-white hover:text-black active:scale-[0.98]'
+      : 'border-black bg-[var(--paper)] hover:bg-black hover:text-white active:scale-[0.98]';
+    const disabledClass = dark
+      ? 'border-neutral-600 bg-neutral-800 text-neutral-500 line-through opacity-70 cursor-not-allowed'
+      : 'border-neutral-400 bg-neutral-200 text-neutral-500 line-through opacity-70 cursor-not-allowed';
+    return `
+      <button data-add="${item.id}" ${sold ? 'disabled' : ''} class="add-simple flex flex-col items-center justify-center gap-0.5 border-2 ${sold ? disabledClass : enabledClass} px-2.5 py-2 text-center transition">
+        <div class="font-mono text-[10px] uppercase tracking-widest opacity-70">${sizeText}${sold ? ' · ' + t('sold.out').toUpperCase() : ''}</div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-display text-lg leading-none">${fmt(item.price)}</span>
+          <span class="font-display text-base leading-none opacity-60">${sold ? '✕' : '+'}</span>
+        </div>
+      </button>
+    `;
+  }).join('');
+
+  return `
+    <div class="card-hover flex flex-col items-stretch border-2 ${skin} p-3">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex h-12 w-12 items-center justify-center border-2 ${dark ? 'border-white' : 'border-black'} bg-[var(--paper)] overflow-hidden">${svgIcon(first.icon, 44)}</div>
+        <span class="border border-current bg-amber-300 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-black">${group.length} ${t('pkg.sizes')}</span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-1">
+        <div class="text-xs font-bold leading-tight md:text-sm">${first.name}</div>${dotEl}
+      </div>
+      <div class="mt-3 grid gap-1.5">
+        ${sizeButtons}
+      </div>
+    </div>
+  `;
+}
+
+function renderSimpleSection(items, dark, label, target) {
+  const groups = groupByName(items);
+  $(target).innerHTML = groups.map(g =>
+    g.length > 1 ? simpleCardGroup(g, dark) : simpleCard(g[0], dark)
+  ).join('');
+  attachSimpleAdds(items, label);
+}
+
+function renderGrill() {
+  renderSimpleSection(GRILL_SIDES, true, 'parrilla', '#grill-grid');
+}
+function renderSaucesPage() {
+  renderSimpleSection(SAUCES_PAGE, false, 'salsa', '#sauces-grid-page');
+}
+function renderDrinks() {
+  renderSimpleSection(DRINKS_INDIVIDUAL, false, 'bebida', '#drinks-grid-individual');
+  renderSimpleSection(DRINKS_LARGE,      false, 'bebida', '#drinks-grid-large');
+  renderSimpleSection(DRINKS_PACKS,      false, 'bebida', '#drinks-grid-packs');
+}
+
+function attachSimpleAdds(source, label) {
+  $$('.add-simple').forEach(btn => {
+    if (btn.dataset.bound === label) return;
+    const id = btn.dataset.add;
+    const item = source.find(x => x.id === id);
+    if (!item) return;
+    btn.dataset.bound = label;
+    btn.addEventListener('click', () => addSimple(item, label));
+  });
+}
+
+function addSimple(item, label) {
+  const existing = state.cart.find(c => c.type === 'simple' && c.refId === item.id);
+  if (existing) {
+    existing.qty += 1;
+    existing.price = existing.unitPrice * existing.qty;
+  } else {
+    state.cart.push({
+      type: 'simple',
+      id: crypto.randomUUID().slice(0, 8),
+      refId: item.id,
+      name: item.name,
+      sub: item.i18nSub ? t(item.i18nSub) : (item.sub || ''),
+      i18nSub: item.i18nSub || null,
+      icon: item.icon,
+      qty: 1,
+      unitPrice: item.price,
+      price: item.price,
+      label,
+    });
+  }
+  persist();
+  renderCart();
+  const sub = item.i18nSub ? t(item.i18nSub) : item.sub;
+  toast(`${item.name}${sub ? ' · ' + sub : ''} ${t('toast.added')}`, { tone: 'success' });
+  bumpCartIcon();
+}
+
+//
+// ============== PACKAGE MODAL ==============
+//
+function openPackageModal(id) {
+  const pkg = id === 'special' ? SPECIAL : PACKAGES.find(p => p.id === id);
+  state.modal = { pkg, qty: 1, doneness: null, addons: [], notes: [] };
+  $('#modal-icon').innerHTML = svgIcon(pkg.icon, 40);
+  $('#modal-name').textContent = pkg.name.toUpperCase();
+  $('#modal-meta').textContent = pkg.serves
+    ? `${t('pkg.for')} ${pkg.serves} · ${fmt(pkg.price)}`
+    : `${fmt(pkg.price)} · ${t('qty.unit')}`;
+  $('#modal-qty-unit').textContent = t('qty.unit');
+  const donBlock = $('#modal-doneness-block');
+  if (pkg.requiresDoneness) {
+    donBlock.classList.remove('hidden');
+    renderDonenessStrip(null);
+  } else {
+    donBlock.classList.add('hidden');
+  }
+  renderAddons([]);
+  renderNotesGrid([]);
+  $('#modal-qty').textContent = '1';
+  state.modal.qty = 1;
+  refreshModalTotals();
+  openSheet('item');
+}
+
+function openSheet(which) {
+  if (which === 'item') {
+    $('#item-modal-scrim').classList.remove('pointer-events-none');
+    $('#item-modal-scrim').style.opacity = '1';
+    requestAnimationFrame(() => $('#item-modal').classList.add('is-open'));
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeItemModal() {
+  $('#item-modal').classList.remove('is-open');
+  $('#item-modal-scrim').classList.add('pointer-events-none');
+  $('#item-modal-scrim').style.opacity = '0';
+  setTimeout(() => { state.modal = null; }, 300);
+  document.body.style.overflow = '';
+}
+
+function renderDonenessStrip(activeId) {
+  const strip = $('#doneness-strip');
+  strip.innerHTML = DONENESS.map(d => `
+    <button data-don="${d.id}" class="don-btn swatch group flex flex-col items-center ${activeId === d.id ? 'is-active' : ''}">
+      <div class="h-12 w-full border-2 border-black md:h-14" style="background:${d.color}"></div>
+      <div class="mt-1 font-mono text-[9px] uppercase tracking-widest leading-tight text-center">${t('don.' + d.id)}</div>
+    </button>
+  `).join('');
+  if (activeId) {
+    const d = DONENESS.find(x => x.id === activeId);
+    $('#modal-doneness-name').textContent = t('don.' + d.id).toUpperCase();
+    $('#doneness-detail').innerHTML = donenessDetailHtml(d);
+  } else {
+    $('#modal-doneness-name').textContent = '—';
+    $('#doneness-detail').innerHTML = t('modal.term.hint');
+  }
+  $$('.don-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.modal.doneness = btn.dataset.don;
+      $$('.don-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+      const d = DONENESS.find(x => x.id === btn.dataset.don);
+      $('#modal-doneness-name').textContent = t('don.' + d.id).toUpperCase();
+      $('#doneness-detail').innerHTML = donenessDetailHtml(d);
+    });
+  });
+}
+
+function donenessDetailHtml(d) {
+  return `
+    <div class="flex items-center gap-3">
+      <span class="inline-block h-6 w-6 border-2 border-black shrink-0" style="background:${d.center}"></span>
+      <div>
+        <div class="font-bold">${t('don.' + d.id)}</div>
+        <div class="text-neutral-700">${t('don.' + d.id + '.sub')} · ${t('modal.cookingTime')} ~ ${d.tempo}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAddons(activeIds = []) {
+  if (state.modal) state.modal.addons = [...activeIds];
+  const grid = $('#addons-grid');
+  grid.innerHTML = ADDONS.map(a => `
+    <button data-addon="${a.id}" class="addon-btn chip flex items-center gap-2 border-2 border-black bg-white px-3 py-3 text-left ${activeIds.includes(a.id) ? 'is-active' : ''}">
+      <span class="inline-block h-4 w-4 rounded-full border border-black/20 shrink-0" style="background:${a.dot}"></span>
+      <span class="flex-1 min-w-0">
+        <div class="text-xs font-bold leading-tight truncate">${t(a.i18n)}</div>
+        <div class="font-mono text-[10px] text-neutral-500">${a.unit} · +${fmt(a.price)}</div>
+      </span>
+    </button>
+  `).join('');
+  $$('.addon-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.addon;
+      const idx = state.modal.addons.indexOf(id);
+      if (idx >= 0) state.modal.addons.splice(idx, 1);
+      else state.modal.addons.push(id);
+      btn.classList.toggle('is-active');
+      refreshModalTotals();
+    });
+  });
+}
+
+function renderNotesGrid(activeNotes = []) {
+  if (state.modal) state.modal.notes = [...activeNotes];
+  const grid = $('#notes-grid');
+  grid.innerHTML = NOTE_KEYS.map(k => {
+    const label = t(k);
+    const isActive = activeNotes.includes(k);
+    return `<button data-note="${k}" class="note-btn chip border-2 border-black bg-white px-3 py-2 text-xs font-bold ${isActive ? 'is-active' : ''}">${label}</button>`;
+  }).join('');
+  $$('.note-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.note;
+      const idx = state.modal.notes.indexOf(v);
+      if (idx >= 0) state.modal.notes.splice(idx, 1);
+      else state.modal.notes.push(v);
+      btn.classList.toggle('is-active');
+    });
+  });
+}
+
+function addonsTotal(ids) {
+  return ids.reduce((s, id) => s + (ADDONS.find(a => a.id === id)?.price || 0), 0);
+}
+
+function refreshModalTotals() {
+  if (!state.modal) return;
+  const { pkg, qty, addons } = state.modal;
+  $('#modal-qty').textContent = qty;
+  $('#modal-qty-price').textContent = `${fmt(pkg.price)} × ${qty}`;
+  const total = pkg.price * qty + addonsTotal(addons) * qty;
+  $('#modal-total').textContent = fmt(total);
+}
+
+$('#close-modal').addEventListener('click', closeItemModal);
+$('#item-modal-scrim').addEventListener('click', closeItemModal);
+$$('.qty-btn').forEach(b => b.addEventListener('click', () => {
+  if (!state.modal) return;
+  const delta = parseInt(b.dataset.qty, 10);
+  state.modal.qty = Math.max(1, Math.min(20, state.modal.qty + delta));
+  refreshModalTotals();
+}));
+
+$('#add-to-cart').addEventListener('click', () => {
+  const m = state.modal;
+  if (!m) return;
+  if (m.pkg.requiresDoneness && !m.doneness) {
+    toast(t('toast.chooseTerm'), { tone: 'warn' });
+    return;
+  }
+  state.cart.push({
+    type: 'package',
+    id: crypto.randomUUID().slice(0, 8),
+    pkgId: m.pkg.id,
+    name: m.pkg.name,
+    serves: m.pkg.serves,
+    icon: m.pkg.icon,
+    qty: m.qty,
+    unitPrice: m.pkg.price,
+    price: m.pkg.price * m.qty,
+    doneness: m.doneness,
+    notes: [...m.notes],
+  });
+  m.addons.forEach(aid => {
+    const a = ADDONS.find(x => x.id === aid);
+    if (!a) return;
+    state.cart.push({
+      type: 'simple',
+      id: crypto.randomUUID().slice(0, 8),
+      refId: a.id,
+      name: t(a.i18n),
+      i18nKey: a.i18n,
+      sub: a.unit,
+      icon: a.icon,
+      qty: m.qty,
+      unitPrice: a.price,
+      price: a.price * m.qty,
+      label: 'extra',
+    });
+  });
+  persist();
+  renderCart();
+  toast(`${m.pkg.name} ${t('toast.added')}`, { tone: 'success' });
+  closeItemModal();
+  bumpCartIcon();
+});
+
+$('#add-special').addEventListener('click', () => openPackageModal('special'));
+
+//
+// ============== CART RENDER ==============
+//
+function donenessLabel(id) { return t('don.' + id); }
+function donenessColor(id) { return DONENESS.find(x => x.id === id)?.color || '#000'; }
+
+function renderCart() {
+  const items = state.cart;
+  const list = $('#cart-items');
+  const summary = $('#cart-summary');
+  const totalQty = items.reduce((s, it) => s + it.qty, 0);
+
+  $('#cart-count-mobile').textContent = totalQty;
+  $('#cart-count-desktop').textContent = totalQty;
+
+  // Bottom cart bar visibility
+  const bar = $('#cart-bar');
+  if (items.length > 0) {
+    bar.classList.add('is-visible');
+    document.body.classList.add('has-cart-bar');
+    const subtotal = items.reduce((s, it) => s + it.price, 0);
+    const itemWord = totalQty === 1 ? t('cart.bar.items') : t('cart.bar.items_plural');
+    $('#cart-bar-summary').textContent = `${totalQty} ${itemWord} · ${fmt(subtotal * 1.0825)}`;
+  } else {
+    bar.classList.remove('is-visible');
+    document.body.classList.remove('has-cart-bar');
+  }
+
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="flex h-full flex-col items-center justify-center text-center py-12">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 14h6l4 26a3 3 0 0 0 3 2.5h22a3 3 0 0 0 3-2.5L52 20H18"/>
+          <circle cx="26" cy="52" r="3"/>
+          <circle cx="44" cy="52" r="3"/>
+        </svg>
+        <div class="mt-4 font-display text-2xl">${t('cart.empty.title')}</div>
+        <p class="mt-1 max-w-[18ch] text-sm text-neutral-600">${t('cart.empty.sub')}</p>
+      </div>
+    `;
+    summary.classList.add('hidden');
+    return;
+  }
+  summary.classList.remove('hidden');
+  list.innerHTML = items.map(it => {
+    if (it.type === 'package') {
+      return `
+        <div class="mb-3 border-2 border-black bg-white p-3 md:p-4">
+          <div class="flex items-start gap-3">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-black bg-[var(--paper)]">
+              ${svgIcon(it.icon, 36)}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-baseline justify-between gap-2">
+                <div class="font-display text-lg md:text-xl truncate">${it.name.toUpperCase()}${it.serves ? ` · ${it.serves}` : ''}</div>
+                <div class="font-display text-lg md:text-xl shrink-0">${fmt(it.price)}</div>
+              </div>
+              <div class="mt-1 font-mono text-[11px] text-neutral-600">${fmt(it.unitPrice)} × ${it.qty}</div>
+              ${it.doneness ? `
+                <div class="mt-2">
+                  <span class="inline-flex items-center gap-1 border border-black px-2 py-0.5 text-[10px] font-bold uppercase">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full" style="background:${donenessColor(it.doneness)}"></span>
+                    ${donenessLabel(it.doneness)}
+                  </span>
+                </div>
+              ` : ''}
+              ${it.notes && it.notes.length ? `<div class="mt-1 text-[11px] text-neutral-600 italic">${it.notes.map(k => t(k)).join(' · ')}</div>` : ''}
+              <div class="mt-3 flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <button data-dec="${it.id}" class="cart-dec border-2 border-black bg-white tap-sm w-10 font-display text-xl btn-primary">−</button>
+                  <span class="font-mono text-base w-10 text-center">${it.qty}</span>
+                  <button data-inc="${it.id}" class="cart-inc border-2 border-black bg-white tap-sm w-10 font-display text-xl btn-primary">+</button>
+                </div>
+                <button data-remove="${it.id}" class="cart-remove text-black/50 hover:text-black tap-sm">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    const displayName = it.i18nKey ? t(it.i18nKey) : it.name;
+    const displaySub  = it.i18nSub ? t(it.i18nSub) : it.sub;
+    return `
+      <div class="mb-3 flex items-center justify-between gap-2 border-2 border-black bg-white p-3 md:p-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex h-10 w-10 items-center justify-center shrink-0">${svgIcon(it.icon, 32)}</div>
+          <div class="min-w-0">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 truncate">${t('cart.label.' + it.label)}${displaySub ? ' · ' + displaySub : ''}</div>
+            <div class="font-display text-base md:text-lg leading-tight truncate">${displayName}</div>
+            <div class="mt-1 flex items-center gap-1">
+              <button data-dec="${it.id}" class="cart-dec border-2 border-black bg-white tap-sm w-9 font-mono text-base btn-primary">−</button>
+              <span class="font-mono text-sm w-7 text-center">${it.qty}</span>
+              <button data-inc="${it.id}" class="cart-inc border-2 border-black bg-white tap-sm w-9 font-mono text-base btn-primary">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <div class="font-display text-base md:text-lg">${fmt(it.price)}</div>
+          <button data-remove="${it.id}" class="cart-remove text-black/50 hover:text-black tap-sm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  $$('.cart-remove').forEach(btn => btn.addEventListener('click', () => removeFromCart(btn.dataset.remove)));
+  $$('.cart-inc').forEach(btn => btn.addEventListener('click', () => bumpQty(btn.dataset.inc, +1)));
+  $$('.cart-dec').forEach(btn => btn.addEventListener('click', () => bumpQty(btn.dataset.dec, -1)));
+
+  const subtotal = items.reduce((s, it) => s + it.price, 0);
+  const tax = subtotal * 0.0825;
+  $('#cart-subtotal').textContent = fmt(subtotal);
+  $('#cart-tax').textContent = fmt(tax);
+  $('#cart-total').textContent = fmt(subtotal + tax);
+}
+
+function removeFromCart(id) {
+  state.cart = state.cart.filter(i => i.id !== id);
+  persist();
+  renderCart();
+  toast(t('toast.removed'));
+}
+
+function bumpQty(id, delta) {
+  const it = state.cart.find(i => i.id === id);
+  if (!it) return;
+  it.qty = Math.max(1, it.qty + delta);
+  it.price = it.unitPrice * it.qty;
+  persist();
+  renderCart();
+}
+
+function bumpCartIcon() {
+  [$('#cart-count-mobile'), $('#cart-count-desktop')].forEach(el => {
+    if (!el) return;
+    el.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.4)' }, { transform: 'scale(1)' }],
+      { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' }
+    );
+  });
+}
+
+//
+// ============== DRAWER ==============
+//
+function openCart() {
+  $('#cart-drawer').classList.add('is-open');
+  $('#scrim').classList.remove('pointer-events-none');
+  $('#scrim').style.opacity = '1';
+  document.body.style.overflow = 'hidden';
+}
+function closeCart() {
+  $('#cart-drawer').classList.remove('is-open');
+  $('#scrim').classList.add('pointer-events-none');
+  $('#scrim').style.opacity = '0';
+  document.body.style.overflow = '';
+}
+$('#open-cart-mobile').addEventListener('click', openCart);
+$('#open-cart-desktop').addEventListener('click', openCart);
+$('#close-cart').addEventListener('click', closeCart);
+$('#scrim').addEventListener('click', closeCart);
+
+//
+// ============== CHECKOUT ==============
+//
+$('#checkout-btn').addEventListener('click', async () => {
+  if (state.cart.length === 0) return;
+
+  // Validate customer name first
+  const nameInput = $('#customer-name');
+  const customerName = (nameInput.value || '').trim();
+  if (!customerName) {
+    nameInput.focus();
+    nameInput.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
+    setTimeout(() => nameInput.classList.remove('ring-2', 'ring-red-500', 'bg-red-50'), 2000);
+    toast(t('cart.nameRequired'), { tone: 'warn' });
+    return;
+  }
+  localStorage.setItem('customerName', customerName);
+
+  const btn = $('#checkout-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  const subtotal = state.cart.reduce((s, it) => s + it.price, 0);
+  const tax = subtotal * 0.0825;
+  const total = subtotal + tax;
+
+  // Try backend first; fall back to offline-only flow if it's unreachable.
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: state.cart,
+        subtotal,
+        tax,
+        total,
+        lang: state.lang,
+        customerName,
+      }),
+    });
+    if (!res.ok) throw new Error('bad response');
+    const order = await res.json();
+    state.cart = [];
+    persist();
+    // Redirect to live tracker (Domino's-style)
+    window.location.href = `/track/${order.id}?lang=${state.lang}`;
+    return;
+  } catch (e) {
+    // Backend not running — show local success modal (demo mode)
+    const id = 'CR-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+    $('#order-id').textContent = id;
+    const m = $('#success-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    state.cart = [];
+    persist();
+    renderCart();
+    closeCart();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+$('#close-success').addEventListener('click', () => {
+  const m = $('#success-modal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+  toast(t('toast.readyAgain'), { tone: 'success' });
+});
+
+//
+// ============== FILTERS ==============
+//
+$$('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.filter = btn.dataset.filter;
+    $$('.filter-chip').forEach(b => b.classList.toggle('is-active', b === btn));
+    renderPackages();
+  });
+});
+
+//
+// ============== LANG TOGGLE ==============
+//
+$$('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+
+//
+// ============== TABS ACTIVE STATE (scrollspy) ==============
+//
+const sections = ['special','paquetes','parrilla','salsas','bebidas'];
+const sectionEls = sections.map(id => document.getElementById(id));
+const tabLinks = sections.map(id => document.querySelector(`[data-tab="${id}"]`));
+
+function updateActiveTab() {
+  const scrollY = window.scrollY + (window.innerHeight * 0.3);
+  let activeIdx = 0;
+  sectionEls.forEach((el, idx) => {
+    if (el && el.offsetTop <= scrollY) activeIdx = idx;
+  });
+  tabLinks.forEach((link, idx) => link?.classList.toggle('is-active', idx === activeIdx));
+  // Auto-scroll the active tab into view (horizontal)
+  const activeLink = tabLinks[activeIdx];
+  if (activeLink) {
+    const tabsEl = document.getElementById('tabs');
+    const linkLeft = activeLink.offsetLeft;
+    const tabsScrollLeft = tabsEl.scrollLeft;
+    const tabsWidth = tabsEl.clientWidth;
+    if (linkLeft < tabsScrollLeft + 20 || linkLeft > tabsScrollLeft + tabsWidth - 80) {
+      tabsEl.scrollTo({ left: linkLeft - 20, behavior: 'smooth' });
+    }
+  }
+}
+
+let scrollTimer;
+window.addEventListener('scroll', () => {
+  if (scrollTimer) return;
+  scrollTimer = requestAnimationFrame(() => {
+    updateActiveTab();
+    scrollTimer = null;
+  });
+}, { passive: true });
+
+//
+// ============== SOLD-OUT (live updates from parrillero) ==============
+//
+state.soldOut = new Set();
+
+function isSoldOut(id) {
+  return state.soldOut.has(id);
+}
+
+async function loadSoldOut() {
+  try {
+    const r = await fetch('/api/sold-out');
+    if (!r.ok) return;
+    const data = await r.json();
+    state.soldOut = new Set(data.items || []);
+    rerenderAllSections();
+  } catch {}
+}
+
+function rerenderAllSections() {
+  renderPackages();
+  renderGrill();
+  renderSaucesPage();
+  renderDrinks();
+}
+
+function subscribeSoldOut() {
+  try {
+    const es = new EventSource('/api/stream');
+    es.addEventListener('items:soldout', (e) => {
+      const data = JSON.parse(e.data);
+      state.soldOut = new Set(data.items || []);
+      rerenderAllSections();
+    });
+  } catch {}
+}
+
+//
+// ============== INIT ==============
+//
+// Pre-fill customer name from previous order
+const cn = $('#customer-name');
+if (cn) cn.value = localStorage.getItem('customerName') || '';
+
+applyI18n();
+renderPackages();
+renderGrill();
+renderSaucesPage();
+renderDrinks();
+renderCart();
+updateActiveTab();
+loadSoldOut();
+subscribeSoldOut();
+
+setTimeout(() => toast(t('toast.welcome'), { tone: 'success', duration: 2000 }), 600);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeItemModal();
+    closeCart();
+  }
+});
+</script>
+</body>
+</html>

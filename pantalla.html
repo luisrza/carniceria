@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NOW SERVING — LA CARNICERÍA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: {
+    display: ['"Bebas Neue"', 'sans-serif'],
+    sans: ['Inter', 'system-ui', 'sans-serif'],
+    mono: ['"JetBrains Mono"', 'monospace'],
+  }}}};
+</script>
+<style>
+  :root { --ink:#0a0a0a; --paper:#fafaf7; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { background: #0a0a0a; color: #fafaf7; height: 100%; overflow: hidden; }
+  body { -webkit-font-smoothing: antialiased; }
+
+  /* Headline ticker for empty state */
+  .ticker { animation: ticker 18s linear infinite; }
+  @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+  /* Ready card pulse */
+  .pulse-ready {
+    animation: pulse-ready 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-ready {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .8); }
+    50% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+  }
+
+  .new-card {
+    animation: pop-in .45s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes pop-in {
+    from { transform: scale(.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .live-dot::after {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 9999px; background: currentColor; opacity: .35;
+    animation: live 1.6s ease-out infinite;
+  }
+  @keyframes live { 0% { transform: scale(.8); opacity: .5; } 100% { transform: scale(2.4); opacity: 0; } }
+
+  /* Full-bleed board layout */
+  .board {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+  }
+
+  .col-grid {
+    display: grid;
+    gap: .75rem;
+    align-content: start;
+    overflow-y: auto;
+  }
+  /* Hide scrollbars on TV */
+  .col-grid::-webkit-scrollbar { display: none; }
+  .col-grid { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .stripe-bg {
+    background-image: repeating-linear-gradient(
+      45deg, #fafaf7 0 12px, transparent 12px 26px
+    );
+  }
+</style>
+</head>
+<body class="font-sans">
+
+<div class="board">
+  <!-- HEADER -->
+  <header class="border-b-4 border-white px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <svg width="42" height="42" viewBox="0 0 32 32" fill="none">
+        <path d="M6 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7H6V10Z" fill="#fafaf7"/>
+        <path d="M16 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7h-3V10Z" fill="#fafaf7"/>
+      </svg>
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-white/60">Now serving</div>
+        <div class="font-display text-3xl tracking-wider sm:text-5xl">LA CARNICERÍA</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-6">
+      <span class="relative inline-flex h-3 w-3 text-emerald-400 live-dot">
+        <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
+      </span>
+      <div id="clock" class="font-mono text-2xl tabular-nums sm:text-4xl">--:--</div>
+    </div>
+  </header>
+
+  <!-- BOARD CONTENT -->
+  <main class="grid grid-cols-1 md:grid-cols-2 divide-y-4 md:divide-y-0 md:divide-x-4 divide-white">
+    <!-- IN KITCHEN -->
+    <section class="flex flex-col p-6 overflow-hidden">
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="font-display text-4xl tracking-tight sm:text-6xl">EN COCINA</h2>
+        <div id="kitchen-count" class="font-display text-4xl tabular-nums sm:text-6xl text-white/40">0</div>
+      </div>
+      <div id="kitchen-list" class="col-grid flex-1"></div>
+      <div id="kitchen-empty" class="hidden flex-1 flex items-center justify-center text-center">
+        <div>
+          <div class="font-display text-5xl text-white/30">—</div>
+          <div class="mt-2 font-mono text-xs uppercase tracking-widest text-white/40">Sin pedidos en cocina</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- READY -->
+    <section class="flex flex-col bg-emerald-600/95 text-white p-6 overflow-hidden">
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="font-display text-4xl tracking-tight sm:text-6xl">LISTOS</h2>
+        <div id="ready-count" class="font-display text-4xl tabular-nums sm:text-6xl text-white/60">0</div>
+      </div>
+      <div id="ready-list" class="col-grid flex-1"></div>
+      <div id="ready-empty" class="hidden flex-1 flex items-center justify-center text-center">
+        <div>
+          <div class="font-display text-5xl text-white/40">—</div>
+          <div class="mt-2 font-mono text-xs uppercase tracking-widest text-white/70">Aún no hay pedidos listos</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER STRIPE -->
+  <footer class="stripe-bg h-3"></footer>
+</div>
+
+<!-- AUDIO HINT (fires when an order goes ready) -->
+<div id="ready-overlay" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/80">
+  <div class="text-center">
+    <div class="font-display text-[10vw] leading-none text-emerald-400">¡LISTO!</div>
+    <div id="overlay-name" class="mt-2 font-display text-[8vw] leading-none uppercase tracking-tight">—</div>
+  </div>
+</div>
+
+<script>
+const STATUSES_KITCHEN = ['queued', 'seasoning', 'grilling'];
+const STATUS_LABEL = {
+  queued: 'EN LA COLA',
+  seasoning: 'SASONANDO',
+  grilling: 'EN LA PARRILLA',
+  ready: 'LISTO',
+};
+const STATUS_COLOR = {
+  queued: '#fafaf7',
+  seasoning: '#fbbf24',
+  grilling: '#dc2626',
+  ready: '#10b981',
+};
+
+function statusIcon(status, size = 22) {
+  const ico = {
+    queued: `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 2h8M4 14h8M4.5 2.5v3l3.5 2.5 3.5-2.5v-3M4.5 13.5v-3l3.5-2.5 3.5 2.5v3"/></svg>`,
+    seasoning: `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="5" y="5" width="6" height="9"/><path d="M5 5V3h6v2"/><circle cx="7" cy="3.6" r="0.5" fill="currentColor" stroke="none"/><circle cx="9" cy="3.6" r="0.5" fill="currentColor" stroke="none"/><circle cx="8" cy="2" r="0.5" fill="currentColor" stroke="none"/></svg>`,
+    grilling: `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M8 1.5c1.6 2.5 3 3.5 3 6.5a3 3 0 01-6 0c0-1.5.8-2.3 1.5-3 0 1.3 1.5 1.3 1.5-3.5z"/></svg>`,
+    ready: `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M3 8l3.5 3.5L13 5"/></svg>`,
+  };
+  return ico[status] || '';
+}
+
+const ordersById = new Map();
+const lastSeenStatus = new Map();
+
+function timeAgo(ts) {
+  const m = Math.floor(Math.max(0, Date.now() - ts) / 60000);
+  if (m < 1) return 'ahora';
+  return m + ' min';
+}
+
+function buildKitchenCard(o) {
+  const name = (o.customerName || o.id).toUpperCase();
+  return `
+    <div class="new-card border-2 border-white bg-white/5 px-5 py-4 flex items-center justify-between gap-4">
+      <div class="min-w-0 flex-1">
+        <div class="font-display text-4xl leading-none truncate sm:text-5xl">${name}</div>
+        <div class="mt-1 font-mono text-xs uppercase tracking-widest text-white/60">${o.id} · hace ${timeAgo(o.created_at)}</div>
+      </div>
+      <div class="shrink-0 inline-flex items-center gap-2 border-2 border-white px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest" style="background:${STATUS_COLOR[o.status]}; color:${o.status === 'queued' || o.status === 'seasoning' ? '#0a0a0a' : '#fafaf7'};">
+        ${statusIcon(o.status, 14)}
+        <span>${STATUS_LABEL[o.status]}</span>
+      </div>
+    </div>
+  `;
+}
+
+function buildReadyCard(o) {
+  const name = (o.customerName || o.id).toUpperCase();
+  return `
+    <div class="new-card pulse-ready border-4 border-white bg-white px-5 py-5 flex items-center justify-between gap-4 text-black">
+      <div class="min-w-0 flex-1">
+        <div class="font-display text-5xl leading-none truncate sm:text-7xl">${name}</div>
+        <div class="mt-1 font-mono text-xs uppercase tracking-widest text-black/60">${o.id}</div>
+      </div>
+      <div class="shrink-0 inline-flex items-center gap-2 border-2 border-black bg-emerald-500 px-4 py-3 font-display text-2xl uppercase tracking-widest text-white">
+        ${statusIcon('ready', 24)}
+        <span>LISTO</span>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const orders = [...ordersById.values()].sort((a, b) => a.created_at - b.created_at);
+  const kitchen = orders.filter(o => STATUSES_KITCHEN.includes(o.status));
+  const ready = orders.filter(o => o.status === 'ready').reverse(); // newest ready on top
+
+  document.getElementById('kitchen-count').textContent = kitchen.length;
+  document.getElementById('ready-count').textContent = ready.length;
+
+  const kList = document.getElementById('kitchen-list');
+  const kEmpty = document.getElementById('kitchen-empty');
+  if (kitchen.length === 0) {
+    kList.classList.add('hidden');
+    kEmpty.classList.remove('hidden');
+    kEmpty.classList.add('flex');
+  } else {
+    kList.classList.remove('hidden');
+    kEmpty.classList.add('hidden');
+    kEmpty.classList.remove('flex');
+    kList.innerHTML = kitchen.map(buildKitchenCard).join('');
+  }
+
+  const rList = document.getElementById('ready-list');
+  const rEmpty = document.getElementById('ready-empty');
+  if (ready.length === 0) {
+    rList.classList.add('hidden');
+    rEmpty.classList.remove('hidden');
+    rEmpty.classList.add('flex');
+  } else {
+    rList.classList.remove('hidden');
+    rEmpty.classList.add('hidden');
+    rEmpty.classList.remove('flex');
+    rList.innerHTML = ready.map(buildReadyCard).join('');
+  }
+}
+
+function clock() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}`;
+}
+
+function chime(kind = 'ready') {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const seq = kind === 'ready' ? [880, 1320, 1760] : [660];
+    seq.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = 0;
+      o.connect(g); g.connect(ctx.destination);
+      const t0 = ctx.currentTime + i * 0.18;
+      g.gain.linearRampToValueAtTime(0.22, t0 + 0.02);
+      g.gain.linearRampToValueAtTime(0, t0 + 0.45);
+      o.start(t0); o.stop(t0 + 0.5);
+    });
+  } catch {}
+}
+
+function readyOverlay(name) {
+  const ov = document.getElementById('ready-overlay');
+  document.getElementById('overlay-name').textContent = name.toUpperCase();
+  ov.classList.remove('hidden');
+  ov.classList.add('flex');
+  setTimeout(() => {
+    ov.classList.add('hidden');
+    ov.classList.remove('flex');
+  }, 4500);
+}
+
+function processOrder(o) {
+  const prev = lastSeenStatus.get(o.id);
+  ordersById.set(o.id, o);
+  if (prev !== 'ready' && o.status === 'ready') {
+    const name = (o.customerName || o.id);
+    readyOverlay(name);
+    chime('ready');
+  } else if (!prev) {
+    chime('new');
+  }
+  lastSeenStatus.set(o.id, o.status);
+}
+
+async function loadOrders() {
+  try {
+    const r = await fetch('/api/orders');
+    if (!r.ok) return;
+    const list = await r.json();
+    list.forEach(o => {
+      ordersById.set(o.id, o);
+      lastSeenStatus.set(o.id, o.status);
+    });
+    render();
+  } catch {}
+}
+
+function subscribe() {
+  const es = new EventSource('/api/stream');
+  es.addEventListener('order:new', (e) => {
+    const o = JSON.parse(e.data);
+    processOrder(o);
+    render();
+  });
+  es.addEventListener('order:update', (e) => {
+    const o = JSON.parse(e.data);
+    processOrder(o);
+    render();
+  });
+  es.addEventListener('order:delete', (e) => {
+    const { id } = JSON.parse(e.data);
+    ordersById.delete(id);
+    lastSeenStatus.delete(id);
+    render();
+  });
+}
+
+clock();
+setInterval(clock, 30000);
+loadOrders();
+subscribe();
+setInterval(render, 30000); // refresh "hace X min" labels
+</script>
+</body>
+</html>

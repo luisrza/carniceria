@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>Tu pedido — LA CARNICERÍA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: {
+      display: ['"Bebas Neue"', 'sans-serif'],
+      sans: ['Inter', 'system-ui', 'sans-serif'],
+      mono: ['"JetBrains Mono"', 'monospace'],
+    }}},
+  };
+</script>
+<style>
+  :root { --ink:#0a0a0a; --paper:#fafaf7; --safe-bottom: env(safe-area-inset-bottom, 0px); }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--paper); color: var(--ink); }
+  body { -webkit-font-smoothing: antialiased; }
+  .grain {
+    background-image:
+      radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+  }
+  .stripe-bg { background-image: repeating-linear-gradient(45deg, #0a0a0a 0 8px, transparent 8px 22px); }
+  ::selection { background: #0a0a0a; color: #fafaf7; }
+
+  .step-active .step-dot {
+    background: #0a0a0a; color: #fafaf7;
+    animation: pulse-step 1.6s ease-in-out infinite;
+  }
+  .step-active .step-icon-bg {
+    background: #0a0a0a;
+  }
+  .step-active .step-icon path,
+  .step-active .step-icon circle,
+  .step-active .step-icon rect {
+    stroke: #fafaf7 !important;
+    fill: none;
+  }
+  .step-done .step-dot {
+    background: #0a0a0a; color: #fafaf7;
+  }
+  .step-done .step-icon-bg { background: #0a0a0a; }
+  .step-done .step-icon path,
+  .step-done .step-icon circle,
+  .step-done .step-icon rect {
+    stroke: #fafaf7 !important;
+    fill: none;
+  }
+  .step-done .step-line { background: #0a0a0a; }
+
+  @keyframes pulse-step {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(10,10,10,.45); }
+    50% { box-shadow: 0 0 0 12px rgba(10,10,10,0); }
+  }
+
+  .ready-flame {
+    background: linear-gradient(180deg, #fafaf7, #fafaf7);
+    animation: ready-celebrate .8s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes ready-celebrate {
+    0% { transform: scale(.6); opacity: 0; }
+    60% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .skel { background: #e5e5e0; animation: skel-pulse 1.4s ease-in-out infinite; }
+  @keyframes skel-pulse { 50% { opacity: .5; } }
+
+  .lang-btn.is-active { background: #0a0a0a; color: #fafaf7; }
+</style>
+</head>
+<body class="font-sans">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-30 border-b-2 border-black bg-[var(--paper)]/95 backdrop-blur">
+  <div class="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 px-3 sm:px-6">
+    <a href="/" class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M6 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7H6V10Z" fill="#0a0a0a"/>
+        <path d="M16 10c0-2 2-4 5-4s5 2 5 4-1 3-3 4l-1 1c-2 1-3 2-3 4v7h-3V10Z" fill="#0a0a0a"/>
+      </svg>
+      <span class="font-display text-xl tracking-wider">LA CARNICERÍA</span>
+    </a>
+    <div class="flex border-2 border-black overflow-hidden">
+      <button data-lang="es" class="lang-btn min-h-[36px] px-2.5 text-[11px] font-bold uppercase tracking-widest">ES</button>
+      <button data-lang="en" class="lang-btn min-h-[36px] px-2.5 text-[11px] font-bold uppercase tracking-widest border-l-2 border-black">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
+
+  <!-- ORDER HEADER -->
+  <div class="grain border-2 border-black bg-white p-5 sm:p-8">
+    <div id="customer-name-block" class="hidden mb-4 border-b-2 border-black pb-4">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="track.forCustomer"></div>
+      <div id="customer-name" class="font-display text-4xl leading-tight tracking-tight sm:text-6xl uppercase">—</div>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="track.label"></div>
+        <div id="order-id" class="font-display text-2xl tracking-tight sm:text-3xl">CR-—</div>
+      </div>
+      <div class="text-right">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="track.placedAt"></div>
+        <div id="placed-at" class="font-mono text-xs sm:text-sm">—</div>
+      </div>
+    </div>
+    <div class="mt-4 border-t-2 border-black pt-4">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="track.headline"></div>
+      <div id="status-headline" class="mt-1 font-display text-3xl leading-tight sm:text-4xl">—</div>
+      <div id="status-eta" class="mt-1 text-sm text-neutral-700">—</div>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <section class="mt-5 border-2 border-black bg-white">
+    <div class="stripe-bg h-2"></div>
+
+    <!-- Mobile: vertical stepper / Desktop: horizontal -->
+    <div id="tracker" class="p-5 sm:p-8">
+      <!-- queued -->
+      <div id="step-queued" class="step grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:grid-cols-1 sm:place-items-center sm:gap-2 sm:flex-1">
+        <div class="step-icon-bg flex h-12 w-12 items-center justify-center border-2 border-black bg-white">
+          <svg class="step-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="square">
+            <path d="M3 5h3l2.4 12.4a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.6L21.5 9H7"/>
+          </svg>
+        </div>
+        <div class="sm:text-center">
+          <div class="font-display text-xl leading-tight" data-i18n="status.queued"></div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="status.queued.sub"></div>
+        </div>
+        <div class="step-time font-mono text-xs text-neutral-700 sm:absolute sm:hidden">—</div>
+      </div>
+      <!-- connector mobile -->
+      <div class="step-line ml-6 my-1 h-6 w-0.5 bg-neutral-300 sm:hidden"></div>
+
+      <div id="step-seasoning" class="step grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:grid-cols-1 sm:place-items-center sm:gap-2 sm:flex-1">
+        <div class="step-icon-bg flex h-12 w-12 items-center justify-center border-2 border-black bg-white">
+          <svg class="step-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="square">
+            <path d="M9 4h6l-1 4h-4z"/>
+            <rect x="8" y="8" width="8" height="10" rx="1"/>
+            <path d="M11 12v3M13 12v3"/>
+          </svg>
+        </div>
+        <div class="sm:text-center">
+          <div class="font-display text-xl leading-tight" data-i18n="status.seasoning"></div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="status.seasoning.sub"></div>
+        </div>
+        <div class="step-time font-mono text-xs text-neutral-700">—</div>
+      </div>
+      <div class="step-line ml-6 my-1 h-6 w-0.5 bg-neutral-300 sm:hidden"></div>
+
+      <div id="step-grilling" class="step grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:grid-cols-1 sm:place-items-center sm:gap-2 sm:flex-1">
+        <div class="step-icon-bg flex h-12 w-12 items-center justify-center border-2 border-black bg-white">
+          <svg class="step-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="square">
+            <path d="M12 3c2 3 4 4 4 8a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 2 2 2-4Z"/>
+          </svg>
+        </div>
+        <div class="sm:text-center">
+          <div class="font-display text-xl leading-tight" data-i18n="status.grilling"></div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="status.grilling.sub"></div>
+        </div>
+        <div class="step-time font-mono text-xs text-neutral-700">—</div>
+      </div>
+      <div class="step-line ml-6 my-1 h-6 w-0.5 bg-neutral-300 sm:hidden"></div>
+
+      <div id="step-ready" class="step grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:grid-cols-1 sm:place-items-center sm:gap-2 sm:flex-1">
+        <div class="step-icon-bg flex h-12 w-12 items-center justify-center border-2 border-black bg-white">
+          <svg class="step-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter">
+            <path d="M4 12l5 5L20 6"/>
+          </svg>
+        </div>
+        <div class="sm:text-center">
+          <div class="font-display text-xl leading-tight" data-i18n="status.ready"></div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="status.ready.sub"></div>
+        </div>
+        <div class="step-time font-mono text-xs text-neutral-700">—</div>
+      </div>
+    </div>
+
+    <div class="stripe-bg h-2"></div>
+  </section>
+
+  <!-- ITEMS -->
+  <section class="mt-5 border-2 border-black bg-white">
+    <div class="border-b-2 border-black px-5 py-3">
+      <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500" data-i18n="track.items.label"></div>
+      <div class="font-display text-2xl" data-i18n="track.items.title"></div>
+    </div>
+    <div id="items-list" class="divide-y-2 divide-black"></div>
+    <div class="border-t-2 border-black p-5 space-y-1">
+      <div class="flex items-baseline justify-between">
+        <span class="font-mono text-xs uppercase tracking-widest text-neutral-600" data-i18n="track.subtotal"></span>
+        <span id="subtotal" class="font-mono text-sm">—</span>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <span class="font-mono text-xs uppercase tracking-widest text-neutral-600" data-i18n="track.tax"></span>
+        <span id="tax" class="font-mono text-sm">—</span>
+      </div>
+      <div class="flex items-baseline justify-between border-t-2 border-black pt-2 mt-2">
+        <span class="font-display text-xl" data-i18n="track.total"></span>
+        <span id="total" class="font-display text-3xl">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIONS -->
+  <div class="mt-5 flex flex-col gap-2 sm:flex-row">
+    <a href="/" class="border-2 border-black bg-white px-4 py-3 text-center text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition" data-i18n="track.newOrder"></a>
+    <button id="copy-link" class="border-2 border-black bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition" data-i18n="track.copyLink"></button>
+  </div>
+
+  <!-- ERROR (hidden by default) -->
+  <div id="error-box" class="hidden mt-5 border-2 border-black bg-white p-5 text-center">
+    <div class="font-display text-3xl" data-i18n="track.notFound"></div>
+    <p class="mt-2 text-sm text-neutral-700" data-i18n="track.notFoundDesc"></p>
+    <a href="/" class="mt-4 inline-block border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white" data-i18n="track.goHome"></a>
+  </div>
+
+</main>
+
+<!-- READY OVERLAY -->
+<div id="ready-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+  <div class="ready-flame border-2 border-black bg-[var(--paper)] p-8 text-center max-w-sm w-full">
+    <div class="mx-auto flex h-20 w-20 items-center justify-center border-2 border-black bg-amber-300">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5"><path d="M12 3c2 3 4 4 4 8a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 2 2 2-4Z"/></svg>
+    </div>
+    <div class="mt-4 font-display text-5xl" data-i18n="ready.title"></div>
+    <p class="mt-2 text-sm text-neutral-700" data-i18n="ready.desc"></p>
+    <button id="dismiss-ready" class="mt-5 w-full border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white" data-i18n="ready.cta"></button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed left-3 right-3 top-20 z-[60] mx-auto hidden max-w-md border-2 border-black bg-black px-4 py-3 text-center text-sm font-medium text-white shadow-[4px_4px_0_0_#0a0a0a]"></div>
+
+<script>
+//
+// ============== I18N ==============
+//
+const I18N = {
+  es: {
+    'track.label':'Pedido',
+    'track.placedAt':'Recibido',
+    'track.headline':'Estado actual',
+    'track.forCustomer':'Pedido de',
+    'track.items.label':'Detalle',
+    'track.items.title':'TU PEDIDO',
+    'track.subtotal':'Subtotal',
+    'track.tax':'Tax',
+    'track.total':'TOTAL',
+    'track.newOrder':'Hacer otro pedido →',
+    'track.copyLink':'Copiar link',
+    'track.linkCopied':'Link copiado',
+    'track.notFound':'Pedido no encontrado',
+    'track.notFoundDesc':'Verifica el código o haz un pedido nuevo.',
+    'track.goHome':'Ir al inicio →',
+
+    'status.queued':'En la cola',
+    'status.queued.sub':'Recibido',
+    'status.seasoning':'Sasonando',
+    'status.seasoning.sub':'Marinando',
+    'status.grilling':'En la parrilla',
+    'status.grilling.sub':'Al carbón',
+    'status.ready':'Lista',
+    'status.ready.sub':'Para recoger',
+
+    'headline.queued':'Tu pedido está en la cola.',
+    'headline.seasoning':'Tu carne está sasonando.',
+    'headline.grilling':'Tu carne está en la parrilla.',
+    'headline.ready':'¡Tu pedido está listo!',
+    'headline.named.queued':'{name}, tu pedido está en la cola.',
+    'headline.named.seasoning':'{name}, tu carne está sasonando.',
+    'headline.named.grilling':'{name}, tu carne está en la parrilla.',
+    'headline.named.ready':'¡{name}, tu pedido está listo!',
+
+    'eta.queued':'En unos minutos pasa a sasonar.',
+    'eta.seasoning':'Listo para parrilla en breve.',
+    'eta.grilling':'Sale en unos minutos.',
+    'eta.ready':'Pasa a recogerlo cuando puedas.',
+
+    'ready.title':'¡LISTO!',
+    'ready.desc':'Pasa a recoger tu pedido cuando puedas.',
+    'ready.cta':'Genial',
+
+    'cart.label.parrilla':'parrilla',
+    'cart.label.salsa':'salsa',
+    'cart.label.bebida':'bebida',
+    'cart.label.extra':'extra',
+
+    'don.azul':'Azul', 'don.rojo':'Rojo', 'don.medio':'Medio rojo',
+    'don.tres':'Tres cuartos', 'don.cuatro':'Punto', 'don.bien':'Bien cocido',
+
+    'just':'ahora',
+    'min':'min',
+  },
+  en: {
+    'track.label':'Order',
+    'track.placedAt':'Placed',
+    'track.headline':'Current status',
+    'track.forCustomer':'Order for',
+    'track.items.label':'Detail',
+    'track.items.title':'YOUR ORDER',
+    'track.subtotal':'Subtotal',
+    'track.tax':'Tax',
+    'track.total':'TOTAL',
+    'track.newOrder':'New order →',
+    'track.copyLink':'Copy link',
+    'track.linkCopied':'Link copied',
+    'track.notFound':'Order not found',
+    'track.notFoundDesc':'Check the code or place a new order.',
+    'track.goHome':'Go home →',
+
+    'status.queued':'In queue',
+    'status.queued.sub':'Received',
+    'status.seasoning':'Seasoning',
+    'status.seasoning.sub':'Marinating',
+    'status.grilling':'On the grill',
+    'status.grilling.sub':'Charcoal',
+    'status.ready':'Ready',
+    'status.ready.sub':'For pickup',
+
+    'headline.queued':'Your order is in the queue.',
+    'headline.seasoning':'Your meat is being seasoned.',
+    'headline.grilling':'Your meat is on the grill.',
+    'headline.ready':'Your order is ready!',
+    'headline.named.queued':'{name}, your order is in the queue.',
+    'headline.named.seasoning':'{name}, your meat is being seasoned.',
+    'headline.named.grilling':'{name}, your meat is on the grill.',
+    'headline.named.ready':'{name}, your order is ready!',
+
+    'eta.queued':'Moves to seasoning shortly.',
+    'eta.seasoning':'Heading to the grill soon.',
+    'eta.grilling':'Coming out in a few minutes.',
+    'eta.ready':'Come pick it up whenever you can.',
+
+    'ready.title':'READY!',
+    'ready.desc':'Come pick up your order whenever you can.',
+    'ready.cta':'Got it',
+
+    'cart.label.parrilla':'grill',
+    'cart.label.salsa':'sauce',
+    'cart.label.bebida':'drink',
+    'cart.label.extra':'extra',
+
+    'don.azul':'Blue', 'don.rojo':'Rare', 'don.medio':'Medium rare',
+    'don.tres':'Medium', 'don.cuatro':'Medium well', 'don.bien':'Well done',
+
+    'just':'now',
+    'min':'min',
+  },
+};
+
+const STATUSES = ['queued', 'seasoning', 'grilling', 'ready'];
+
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+let lang = (new URLSearchParams(location.search).get('lang')) || localStorage.getItem('lang') || 'es';
+const t = (k) => I18N[lang][k] ?? k;
+
+function applyI18n() {
+  document.documentElement.lang = lang;
+  $$('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  $$('.lang-btn').forEach(b => b.classList.toggle('is-active', b.dataset.lang === lang));
+}
+function setLang(l) {
+  if (lang === l) return;
+  lang = l;
+  localStorage.setItem('lang', l);
+  applyI18n();
+  if (currentOrder) renderOrder(currentOrder);
+}
+$$('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+
+//
+// ============== ORDER FETCH + RENDER ==============
+//
+const orderId = location.pathname.split('/').filter(Boolean).pop();
+let currentOrder = null;
+let lastStatus = null;
+let timeUpdater = null;
+
+function timeAgo(ts) {
+  const diff = Math.max(0, Date.now() - ts);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return t('just');
+  return `${mins} ${t('min')}`;
+}
+
+function timeStr(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString(lang === 'es' ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderOrder(o) {
+  currentOrder = o;
+  $('#order-id').textContent = o.id;
+  $('#placed-at').textContent = timeStr(o.created_at);
+
+  // Customer name (top of card, big)
+  const name = (o.customerName || '').trim();
+  if (name) {
+    $('#customer-name').textContent = name;
+    $('#customer-name-block').classList.remove('hidden');
+  } else {
+    $('#customer-name-block').classList.add('hidden');
+  }
+
+  // headline (personalized if name available)
+  const headlineKey = name ? 'headline.named.' + o.status : 'headline.' + o.status;
+  const headlineText = t(headlineKey).replace('{name}', name.split(' ')[0] || '');
+  $('#status-headline').textContent = headlineText;
+  $('#status-eta').textContent = t('eta.' + o.status);
+
+  // step states
+  const idx = STATUSES.indexOf(o.status);
+  STATUSES.forEach((s, i) => {
+    const el = document.getElementById('step-' + s);
+    if (!el) return;
+    el.classList.remove('step-active', 'step-done');
+    const timeEl = el.querySelector('.step-time');
+    if (i < idx) {
+      el.classList.add('step-done');
+      const h = (o.status_history || []).find(h => h.status === s);
+      if (timeEl) timeEl.textContent = h ? timeStr(h.at) : '✓';
+    } else if (i === idx) {
+      el.classList.add('step-active');
+      const h = (o.status_history || []).find(h => h.status === s);
+      if (timeEl) timeEl.textContent = h ? timeAgo(h.at) : t('just');
+    } else {
+      if (timeEl) timeEl.textContent = '—';
+    }
+  });
+
+  // mark line states
+  STATUSES.forEach((s, i) => {
+    const el = document.getElementById('step-' + s);
+    if (!el) return;
+    const next = el.nextElementSibling;
+    if (next && next.classList.contains('step-line')) {
+      next.style.background = (i < idx) ? '#0a0a0a' : '#d4d4d4';
+    }
+  });
+
+  // items
+  const itemsHtml = o.items.map(it => {
+    if (it.type === 'package') {
+      const dq = it.doneness ? `<span class="ml-2 inline-flex items-center gap-1 border border-black px-2 py-0.5 text-[10px] font-bold uppercase">
+        <span class="inline-block h-2 w-2 rounded-full" style="background:${donenessColor(it.doneness)}"></span>${t('don.' + it.doneness)}
+      </span>` : '';
+      return `
+        <div class="flex items-center justify-between gap-3 px-5 py-3">
+          <div class="min-w-0">
+            <div class="font-display text-lg leading-tight">${it.name.toUpperCase()}${it.serves ? ' · ' + it.serves : ''}</div>
+            <div class="font-mono text-[11px] text-neutral-600">${fmt(it.unitPrice)} × ${it.qty} ${dq}</div>
+          </div>
+          <div class="font-display text-lg shrink-0">${fmt(it.price)}</div>
+        </div>
+      `;
+    }
+    return `
+      <div class="flex items-center justify-between gap-3 px-5 py-3">
+        <div class="min-w-0">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">${t('cart.label.' + it.label)}${it.sub ? ' · ' + it.sub : ''}</div>
+          <div class="font-display text-base leading-tight">${it.name}</div>
+          <div class="font-mono text-[11px] text-neutral-600">${fmt(it.unitPrice)} × ${it.qty}</div>
+        </div>
+        <div class="font-display text-lg shrink-0">${fmt(it.price)}</div>
+      </div>
+    `;
+  }).join('');
+  $('#items-list').innerHTML = itemsHtml;
+
+  $('#subtotal').textContent = fmt(o.subtotal ?? (o.total / 1.0825));
+  $('#tax').textContent      = fmt(o.tax ?? (o.total - o.total/1.0825));
+  $('#total').textContent    = fmt(o.total);
+
+  // celebrate on ready transition
+  if (lastStatus && lastStatus !== 'ready' && o.status === 'ready') {
+    showReadyOverlay();
+    playReadyChime();
+  }
+  lastStatus = o.status;
+}
+
+function donenessColor(id) {
+  const map = { azul:'#5b1212', rojo:'#7a1a1a', medio:'#a23030', tres:'#b9614a', cuatro:'#9c6242', bien:'#5e3a23' };
+  return map[id] || '#000';
+}
+
+async function loadOrder() {
+  if (!orderId || orderId === 'track') return showError();
+  try {
+    const r = await fetch('/api/orders/' + orderId);
+    if (r.status === 404) return showError();
+    if (!r.ok) throw new Error('failed');
+    const o = await r.json();
+    lang = (new URLSearchParams(location.search).get('lang')) || o.lang || lang;
+    applyI18n();
+    renderOrder(o);
+    subscribe();
+    if (timeUpdater) clearInterval(timeUpdater);
+    timeUpdater = setInterval(() => { if (currentOrder) renderOrder(currentOrder); }, 30000);
+  } catch (e) {
+    console.error(e);
+    showError();
+  }
+}
+
+function subscribe() {
+  const es = new EventSource('/api/orders/' + orderId + '/stream');
+  es.addEventListener('order:update', (ev) => {
+    const o = JSON.parse(ev.data);
+    renderOrder(o);
+  });
+  es.onerror = () => { /* let browser auto-reconnect */ };
+}
+
+function showError() {
+  $('#error-box').classList.remove('hidden');
+  $$('main > section').forEach(s => s.classList.add('hidden'));
+  $('main > .grain').classList.add('hidden');
+  $('main > .mt-5.flex').classList.add('hidden');
+  applyI18n();
+}
+
+function showReadyOverlay() {
+  const o = $('#ready-overlay');
+  o.classList.remove('hidden');
+  o.classList.add('flex');
+}
+$('#dismiss-ready').addEventListener('click', () => {
+  $('#ready-overlay').classList.add('hidden');
+  $('#ready-overlay').classList.remove('flex');
+});
+
+function playReadyChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1320, 1760].forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = 0;
+      o.connect(g); g.connect(ctx.destination);
+      const t0 = ctx.currentTime + i * 0.15;
+      g.gain.linearRampToValueAtTime(0.18, t0 + 0.02);
+      g.gain.linearRampToValueAtTime(0, t0 + 0.35);
+      o.start(t0); o.stop(t0 + 0.4);
+    });
+  } catch {}
+}
+
+// copy link
+$('#copy-link').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    const tEl = $('#toast');
+    tEl.textContent = t('track.linkCopied');
+    tEl.classList.remove('hidden');
+    setTimeout(() => tEl.classList.add('hidden'), 1800);
+  } catch {}
+});
+
+applyI18n();
+loadOrder();
+</script>
+</body>
+</html>

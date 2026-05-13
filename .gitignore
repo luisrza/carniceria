@@ -1,0 +1,12 @@
+node_modules/
+orders.json
+.DS_Store
+*.log
+/tmp/
+image-batch/
+.env
+.env.local
+
+# Duplicate of icon downloads
+icons/images-*/
+icons/*.zip
